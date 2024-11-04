@@ -23,10 +23,10 @@ description: >- # used by seo meta and the atom feed
 
 # Fill in the protocol & hostname for your site.
 # e.g. 'https://username.github.io', note that it does not end with a '/'.
-url: "https://caturmahdialfurqon.github.io"
+url: "https://cmalf.github.io"
 
 github:
-  username: caturmahdialfurqon # change to your github username
+  username: cmalf # change to your github username
 
 twitter:
   username: # change to your twitter username
@@ -34,12 +34,12 @@ twitter:
 social:
   # Change to your full name.
   # It will be displayed as the default author of the posts and the copyright owner in the Footer
-  name: caturmahdialfurqon
+  name: cmalf
   email: caturmahdi.alfurqon@icloud.com # change to your email address
   links:
     # The first element serves as the copyright owner's link
     # - https://twitter.com/ # change to your twitter homepage
-    - https://github.com/caturmahdialfurqon # change to your github homepage
+    - https://github.com/cmalf # change to your github homepage
     # Uncomment below to add more social links
     # - https://www.facebook.com/username
     # - https://www.linkedin.com/in/username
@@ -117,7 +117,7 @@ comments:
     issue_term: # < url | pathname | title | ...>
   # Giscus options › https://giscus.app
   giscus:
-    repo: caturmahdialfurqon/comments # <gh-username>/<repo>
+    repo: cmalf/comments # <gh-username>/<repo>
     repo_id: R_kgDOMAoGkw
     category: General
     category_id: DIC_kwDOMAoGk84CfnJS
