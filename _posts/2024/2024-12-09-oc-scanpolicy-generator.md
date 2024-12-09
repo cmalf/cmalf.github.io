@@ -3,7 +3,7 @@ layout: post
 title: OC Scanpolicy Generator
 date: 2024-12-09 20:54:10 +07:00
 categories: [Hackintosh , Tools]
-tags: [hackintosh,script,Java]
+tags: [hackintosh,script,java]
 description: Effortlessly generate precise ScanPolicy values for your OpenCore setup
 image: /assets/img/Post/oc-scanpolicy-generator/oc-scanpolicy-gen.png
 alt: "image alt text"
