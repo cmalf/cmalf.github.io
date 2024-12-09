@@ -12,7 +12,14 @@ comments: true
 
 ## MacMini Hackintosh (HackMini) OC 1.0.0
 
-This hackintosh is perfect for the `HP Elitdesk 800 g4 DM 35W`, exactly as stated. It can also be used with other Serries, such as the 800 g1, g2, g5, and SFF models with `CoffeeLake` (CFL) and `CoffeeLake Refresh` (CFLR), using the `MacMini 2018` SMBIOS.
+Unlock the Mac Experience on Your HP EliteDesk!
+
+This hackintosh configuration is designed to bring the best of both worlds: the power and reliability of your HP EliteDesk and the intuitive user experience of macOS.
+
+Specifically optimized for `HP EliteDesk 800 G4 and G5 DM 35W/65W` models, this setup can also be adapted to various Series 800 G4, G5, and SFF models with `CoffeeLake` (CFL) and `CoffeeLake Refresh` (CFLR) processors.
+
+Transform your `HP EliteDesk 800 G4/G5 DM 35W/65W` into a `powerful Mac` with this optimized `hackintosh` configuration. Leveraging the `MacMini 2018` SMBIOS, you can enjoy a seamless macOS experience.
+
 ## My System Specs of My HP Elitdesk 800 G4 DM 35W
 
 ![HP ELITDESK](https://support.hp.com/wcc-assets/document/images/695/c06047206.png){: w="250" h="500"}
@@ -57,15 +64,15 @@ This hackintosh is perfect for the `HP Elitdesk 800 g4 DM 35W`, exactly as state
 ## My Hacmini with Sonoma 14.5
 <hr>
 ![hackmini](/assets/img/Post/The-Perfect-MacMini-Hackintosh/Screenshot%202024-06-02%20at%2016.52.30.png){: w="250" h="500" .left} <br>
-![hackmini](/assets/img/Post/The-Perfect-MacMini-Hackintosh/Screenshot%202024-06-02%20at%2016.59.33.png){: w="350" h="700" .left} <br>
 <br>
 <span style="color: #FF0000 !important;">System info and About This Hack</span>
 
-![MyHack](/assets/img/Post/The-Perfect-MacMini-Hackintosh/Screenshot%202024-06-02%20at%2019.00.21.png)
-> Click the image for `full view`
+For other just check My github Repository [HP-EliteDesk-800-G4-G5-Hackintosh](https://github.com/cmalf/HP-EliteDesk-800-G4-G5-Hackintosh)
+
 <hr>
 <br>
-
+<br><br><br><br>
+<br>
 ## What is not working
 
 - DRM (no hackintosh solution for DRM with UHD 630 iGPU)
@@ -77,12 +84,14 @@ This hackintosh is perfect for the `HP Elitdesk 800 g4 DM 35W`, exactly as state
 - Sleep / Wake
 - Multiple displays with IGPU graphics acceleration, hot pluggable display ports and DP->DVI adapters
 - USB 3.1 ports
+- Type C Port
 - Audio (internal speaker and headphone jack)
 - Ethernet
 - Microphone / front-right audio port (tested with CTIA-style 4-connector headset)
-- Airport
+- Airport 
 - WIFI 
 - BlueTooth (with USB-Port Modified As Dongle)
+- for wifi in sequoia (15 - 15.1.1) use `itlwm kext + Heliport` (airport not supported yet)
 
 ## Bios Settings
 
@@ -100,7 +109,7 @@ You can see the bios setting with pdf.
  if you dont have any mac system.
 
   You can download below!
-
+- [MacOS Sequoia (15.1.1) 24B91](https://swcdn.apple.com/content/downloads/21/19/072-30111-A_4V7Y0VVH1Q/ie1hmy1uaj094z769s4zqmdaojp2vk4dkj/InstallAssistant.pkg)
 - [MacOS Sonoma (14.5) 23F79](https://swcdn.apple.com/content/downloads/32/06/062-01946-A_0PEP7JHIWA/1pfs4xh22555dj51fkep7w06s4eiezh21p/InstallAssistant.pkg)
 - [MacOS Ventura (13.6.7) 22G720](https://swcdn.apple.com/content/downloads/46/31/052-96247-A_MLN9N00Y8W/dmml3up52hrsb01krjtczmdhexiruv1b5m/InstallAssistant.pkg)
 - [MacOS Monterey (12.7.5) 21H1222](https://swcdn.apple.com/content/downloads/02/18/052-96238-A_V534Q7DYXO/lj721dkb4wvu0l3ucuhqfjk7i5uwq1s8tz/InstallAssistant.pkg)
@@ -111,11 +120,21 @@ For another version You can visit [Mr. Macintosh](https://mrmacintosh.com/)
 > Don't worry the Source link is Officially from Apple. `http://swcdn.apple.com/`
 {: .prompt-warning }
 
-## My EFI with OpenCore 1.0.0
+## My EFI with OC `Opencore`
 
-[Download EFI 1.0.0.zip on My Repository here](https://github.com/caturmahdialfurqon/HP-Elitdesk-800-G4-G5-Hackintosh)
+- Release EFI OC 1.0.0 on My Repository [here](https://github.com/caturmahdialfurqon/HP-Elitdesk-800-G4-G5-Hackintosh)
+
+- Release EFI OC 1.0.2 on My Release [here](https://github.com/cmalf/HP-EliteDesk-800-G4-G5-Hackintosh/releases/tag/OC1.0.2-EFI-R001)
+
+> This EFI can be Use for both Bootable and System
+{: .prompt-tip }
 
 ## For Installation
 
-> Dont forget before installing Macos VENTURA OR SONOMA set First `SecureBoot` to `Disable` For smooth Installation. You can set to `default` after installation.
+> Dont forget before installing Macos SONOMA and SEQUOIA set First `SecureBoot` to `Disable` For smooth Installation. You can set to `default` after installation.
+{: .prompt-tip }
+
+`Update` ❗✎ᝰ. For Now Onwards
+
+> I think it's better to set SBM to `permanent disabled`. both `Sonoma` and `Sequoia`
 {: .prompt-tip }
