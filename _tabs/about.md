@@ -21,7 +21,7 @@ Feeling stuck in a coding rut? Let's break free together and embark on a new cod
 Need a helping hand with your digital sorcery? Don't hesitate to reach out.<br> I'm always eager to share knowledge and collaborate on exciting projects.<br>
 
 Let's create something extraordinary together! 💫 
-<hr>
+<br><hr>
 
 > Cheers to you!
 {: .prompt-warning }
