@@ -1,8 +1,6 @@
-/*
- * The main dark mode styles
- */
+@mixin styles {
+  color-scheme: dark;
 
-@mixin dark-scheme {
   /* Framework color */
   --main-bg: rgb(27, 27, 30);
   --mask-bg: rgb(68, 69, 70);
@@ -11,18 +9,17 @@
   /* Common color */
   --text-color: rgb(175, 176, 177);
   --text-muted-color: #868686;
-  --text-muted-hightlight-color: #aeaeae;
-  --heading-color: rgb(255, 255, 255, 0.95);
+  --text-muted-highlight-color: #aeaeae;
+  --heading-color: #cccccc;
   --label-color: #a7a7a7;
   --blockquote-border-color: rgb(66, 66, 66);
   --blockquote-text-color: #868686;
-  --link-color: rgb(255, 255, 255, 0.95);
+  --link-color: rgb(138, 180, 248);
   --link-underline-color: rgb(82, 108, 150);
   --button-bg: #1e1e1e;
   --btn-border-color: #2e2f31;
   --btn-backtotop-color: var(--text-color);
   --btn-backtotop-border-color: #212122;
-  --btn-box-shadow: var(--main-bg);
   --card-header-bg: #292929;
   --checkbox-color: rgb(118, 120, 121);
   --checkbox-checked-color: var(--link-color);
@@ -49,7 +46,7 @@
   /* Topbar */
   --topbar-bg: rgb(27, 27, 30, 0.64);
   --topbar-text-color: var(--text-color);
-  --search-border-color: #00BFFF;
+  --search-border-color: rgb(55, 55, 55);
   --search-icon-color: rgb(100, 102, 105);
   --input-focus-border-color: rgb(112, 114, 115);
 
@@ -59,7 +56,8 @@
   --btn-paginator-hover-color: #2e2e2e;
 
   /* Posts */
-  --toc-highlight: rgb(255, 255, 255, 0.95);
+  --toc-highlight: rgb(116, 178, 243);
+  --toc-popup-border-color: #373737;
   --tag-hover: rgb(43, 56, 62);
   --tb-odd-bg: #252526; /* odd rows of the posts' table */
   --tb-even-bg: rgb(31, 31, 34); /* even rows of the posts' table */
@@ -84,27 +82,40 @@
   --prompt-danger-bg: rgb(86, 28, 8, 0.8);
   --prompt-danger-icon-color: #cd0202;
 
-  /* tags */
-  --tag-border: #00BFFF;
+  /* Tags */
+  --tag-border: rgb(59, 79, 88);
   --tag-shadow: rgb(32, 33, 33);
   --dash-color: rgb(63, 65, 68);
   --search-tag-bg: #292828;
 
-  /* categories */
-  --categories-border: #00BFFF;
+  /* Categories */
+  --categories-border: rgb(64, 66, 69, 0.5);
   --categories-hover-bg: rgb(73, 75, 76);
   --categories-icon-hover-color: white;
 
-  /* archives */
+  /* Archive */
   --timeline-node-bg: rgb(150, 152, 156);
   --timeline-color: rgb(63, 65, 68);
   --timeline-year-dot-color: var(--timeline-color);
+
+  /* Code highlight colors */
+  --language-border-color:#00BFFF;
+  --highlight-bg-color: silver;
+  --highlighter-rouge-color: #c9def1;
+  --highlight-lineno-color: #00BFFF;
+  --inline-code-bg: #FF0000 !important;
+  --code-color: rgb(255, 255, 255, 0.95);
+  --code-header-text-color: rgb(255, 255, 255, 0.95);
+  --code-header-muted-color: #000033;
+  --code-header-icon-color: #FF0000 !important;
+  --clipboard-checked-color: #000033;
+  --filepath-text-color: rgb(255, 255, 255, 0.95);
 
   .light {
     display: none;
   }
 
-  /* categories */
+  /* Categories */
   .categories.card,
   .list-group-item {
     background-color: var(--card-bg);
@@ -151,4 +162,151 @@
   #disqus_thread {
     color-scheme: none;
   }
-} /* dark-scheme */
+
+  /* --- Syntax highlight theme from `rougify style base16.dark` --- */
+
+  .highlight .gp {
+    color: #87939d;
+  }
+
+  .highlight table td {
+    padding: 5px;
+  }
+
+  .highlight table pre {
+    margin: 0;
+  }
+
+  .highlight,
+  .highlight .w {
+    color: #d0d0d0;
+    background-color: #151515;
+  }
+
+  .highlight .err {
+    color: #151515;
+    background-color: #ac4142;
+  }
+
+  .highlight .c,
+  .highlight .ch,
+  .highlight .cd,
+  .highlight .cm,
+  .highlight .cpf,
+  .highlight .c1,
+  .highlight .cs {
+    color: #848484;
+  }
+
+  .highlight .cp {
+    color: #f4bf75;
+  }
+
+  .highlight .nt {
+    color: #f4bf75;
+  }
+
+  .highlight .o,
+  .highlight .ow {
+    color: #d0d0d0;
+  }
+
+  .highlight .p,
+  .highlight .pi {
+    color: #d0d0d0;
+  }
+
+  .highlight .gi {
+    color: #90a959;
+  }
+
+  .highlight .gd {
+    color: #f08a8b;
+    background-color: #320000;
+  }
+
+  .highlight .gh {
+    color: #6a9fb5;
+    background-color: #151515;
+    font-weight: bold;
+  }
+
+  .highlight .k,
+  .highlight .kn,
+  .highlight .kp,
+  .highlight .kr,
+  .highlight .kv {
+    color: #aa759f;
+  }
+
+  .highlight .kc {
+    color: #d28445;
+  }
+
+  .highlight .kt {
+    color: #d28445;
+  }
+
+  .highlight .kd {
+    color: #d28445;
+  }
+
+  .highlight .s,
+  .highlight .sb,
+  .highlight .sc,
+  .highlight .dl,
+  .highlight .sd,
+  .highlight .s2,
+  .highlight .sh,
+  .highlight .sx,
+  .highlight .s1 {
+    color: #90a959;
+  }
+
+  .highlight .sa {
+    color: #aa759f;
+  }
+
+  .highlight .sr {
+    color: #75b5aa;
+  }
+
+  .highlight .si {
+    color: #b76d45;
+  }
+
+  .highlight .se {
+    color: #b76d45;
+  }
+
+  .highlight .nn {
+    color: #f4bf75;
+  }
+
+  .highlight .nc {
+    color: #f4bf75;
+  }
+
+  .highlight .no {
+    color: #f4bf75;
+  }
+
+  .highlight .na {
+    color: #6a9fb5;
+  }
+
+  .highlight .m,
+  .highlight .mb,
+  .highlight .mf,
+  .highlight .mh,
+  .highlight .mi,
+  .highlight .il,
+  .highlight .mo,
+  .highlight .mx {
+    color: #90a959;
+  }
+
+  .highlight .ss {
+    color: #90a959;
+  }
+}

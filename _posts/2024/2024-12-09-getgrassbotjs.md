@@ -3,7 +3,7 @@ layout: post
 title: 🌱 getgrass-miner-bot
 date: 2024-12-09 21:21:28 +07:00
 categories: [Tools]
-tags: [hackintosh,script,Java]
+tags: [hackintosh,script,java]
 description: A Node.js script to automate grass Season 2 mining.
 image: /assets/img/Post/getgrassbot/getgrassbot.png
 alt: "image alt text"

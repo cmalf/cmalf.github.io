@@ -1,13 +1,14 @@
 ---
 ---
 
-@import 'main
+@use 'main
 {%- if jekyll.environment == 'production' -%}
   .bundle
 {%- endif -%}
 ';
 
-//=====================================================================
+/* append your custom style below */
+
 
 #panel-wrapper .panel-heading{
   color: #00BFFF;
@@ -154,10 +155,3 @@ white-space: nowrap;
       opacity: 1;
     }
   }
-
-
-
-
-
-
-//=====================================================================
