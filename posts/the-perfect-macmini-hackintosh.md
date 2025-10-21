@@ -2,7 +2,7 @@
 title: The Perfect MacMini Hackintosh
 date: 2024-06-02 19:13:24 +07:00
 description: Perfect Hackintosh HP Elitdesk 800 G4 DM 35W, with SMBIOS MACMINI 2018
-image: /assets/img/Post/Think-different.jpeg
+image: /assets/img/Post/hackmini/hackintosh.gif
 author: "cmalf"
 ---
 
@@ -58,9 +58,9 @@ Transform your `HP EliteDesk 800 G4/G5 DM 35W/65W` into a `powerful Mac` with th
 
 ## My Hacmini with Sonoma 14.5
 
-![hackmini](/assets/img/Post/hackmini.png)
-![hackmini](/assets/img/Post/hackmini1.png)
-![hackmini](/assets/img/Post/hackmini2.png)
+![hackmini](/assets/img/Post/hackmini/hackmini.png)
+![hackmini](/assets/img/Post/hackmini/hackmini1.png)
+![hackmini](/assets/img/Post/hackmini/hackmini2.png)
 
 
 ## System info and About This Hack
