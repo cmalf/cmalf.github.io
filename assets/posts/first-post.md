@@ -1,5 +1,5 @@
 ---
-title: "My Test Post"
+title: first post"
 date: 2024-05-25
 description: "This is a simple test post for React blog. It includes markdown elements like code, quotes, and images."
 author: "cmalf"
