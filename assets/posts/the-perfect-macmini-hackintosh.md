@@ -93,7 +93,7 @@ For other just check My github Repository [HP-EliteDesk-800-G4-G5-Hackintosh](ht
 You can see the bios setting with pdf.
 > Right Click the file pdf below and `Open Link In New Tab`
 
-- [Bios settings.pdf](/assets/img/Post/HP-EliteDesk-800-G4-Mini-BIOS-Configuration.pdf)
+- [Bios settings.pdf](/assets/img/Post/hackmini/HP-EliteDesk-800-G4-Mini-BIOS-Configuration.pdf)
 
 
 ## Here To Download the OS
