@@ -93,10 +93,8 @@ For other just check My github Repository [HP-EliteDesk-800-G4-G5-Hackintosh](ht
 You can see the bios setting with pdf.
 > Right Click the file pdf below and `Open Link In New Tab`
 
-- [Bios settings.pdf](/cmalf-pages/assets/img/Post/HP-EliteDesk-800-G4-Mini-BIOS-Configuration.pdf)
+- [Bios settings.pdf](/assets/img/Post/HP-EliteDesk-800-G4-Mini-BIOS-Configuration.pdf)
 
-
-<br>
 
 ## Here To Download the OS
 
@@ -112,8 +110,9 @@ You can see the bios setting with pdf.
 
 For another version You can visit [Mr. Macintosh](https://mrmacintosh.com/)
 
+>[!WARNING]
 > Don't worry the Source link is Officially from Apple. `http://swcdn.apple.com/`
-{: .prompt-warning }
+
 
 ## My EFI with OC `Opencore`
 
@@ -121,8 +120,8 @@ For another version You can visit [Mr. Macintosh](https://mrmacintosh.com/)
 
 - Release EFI OC 1.0.2 on My Release [here](https://github.com/cmalf/HP-EliteDesk-800-G4-G5-Hackintosh/releases/tag/OC1.0.2-EFI-R001)
 
+>[!TIP]
 > This EFI can be Use for both Bootable and System
-{: .prompt-tip }
 
 ## For Installation
 
@@ -131,5 +130,5 @@ For another version You can visit [Mr. Macintosh](https://mrmacintosh.com/)
 
 ## Update ❗✎ᝰ. For Now Onwards
 
+>[!TIP]
 > I think it's better to set SBM to `permanent disabled`. both `Sonoma` and `Sequoia`
-{: .prompt-tip }

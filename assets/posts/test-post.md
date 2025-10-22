@@ -1,5 +1,5 @@
 ---
-title: first post
+title: test post
 date: 2024-05-25
 description: "This is a simple test post for React blog. It includes markdown elements like code, quotes, and images."
 author: "cmalf"
@@ -10,10 +10,17 @@ image: "/assets/img/Post/My-first-post-test/notalone.gif"
 
 This is my test post
 
+```bash
+brain install summer
+```
 
+> [!TIP]
 > Your `summer` look like sir.!!!
 > Yup.. `Alone` but `HAPPY`
 
 ![Summer Image](/assets/img/Post/My-first-post-test/summer.gif)
 
-# End of content.
+> [!WARNING]
+> Markdown.md
+
+## End of content.
