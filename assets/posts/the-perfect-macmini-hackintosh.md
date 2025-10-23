@@ -2,7 +2,7 @@
 title: The Perfect MacMini Hackintosh
 date: 2024-06-02 19:13:24 +07:00
 description: Perfect Hackintosh HP Elitdesk 800 G4 DM 35W, with SMBIOS MACMINI 2018
-image: /assets/img/Post/hackmini/hackmini.gif
+image: /assets/img/Post/hackmini/hackintosh.gif
 author: "cmalf"
 ---
 
@@ -110,7 +110,6 @@ You can see the bios setting with pdf.
 
 For another version You can visit [Mr. Macintosh](https://mrmacintosh.com/)
 
->[!WARNING]
 > Don't worry the Source link is Officially from Apple. `http://swcdn.apple.com/`
 
 
@@ -120,7 +119,6 @@ For another version You can visit [Mr. Macintosh](https://mrmacintosh.com/)
 
 - Release EFI OC 1.0.2 on My Release [here](https://github.com/cmalf/HP-EliteDesk-800-G4-G5-Hackintosh/releases/tag/OC1.0.2-EFI-R001)
 
->[!TIP]
 > This EFI can be Use for both Bootable and System
 
 ## For Installation
@@ -130,5 +128,4 @@ For another version You can visit [Mr. Macintosh](https://mrmacintosh.com/)
 
 ## Update ❗✎ᝰ. For Now Onwards
 
->[!TIP]
 > I think it's better to set SBM to `permanent disabled`. both `Sonoma` and `Sequoia`
