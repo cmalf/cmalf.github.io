@@ -1,10 +1,12 @@
 ---
 title: The Perfect MacMini Hackintosh
 date: 2024-06-02
-description: Perfect Hackintosh HP Elitdesk 800 G4 DM 35W, with SMBIOS MACMINI 2018
+description: Hackintosh HP Elitdesk 800 G4/G5 DM 35W/65W, with SMBIOS MACMINI 2018
 image: /assets/img/Post/hackmini/hackmini.webp
 author: "cmalf"
 ---
+
+![Hackmini Preview](/assets/img/Post/hackmini/hackmini.webp)
 
 ## MacMini Hackintosh (HackMini) OC 1.0.0
 

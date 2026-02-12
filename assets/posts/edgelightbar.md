@@ -6,9 +6,9 @@ author: "cmalf"
 image: /assets/img/Post/edgelightbar/edgelightbar.webp
 ---
 
-# EdgeLightBar – Quick Menu Bar Control for EdgeLight Overlay
-
 ![EdgeLightBar Preview](/assets/img/Post/edgelightbar/edgelightbar.webp)
+
+# EdgeLightBar – Quick Menu Bar Control for EdgeLight Overlay
 
 EdgeLightBar is a simple companion app that puts EdgeLight overlay controls right in your macOS menu bar.
 

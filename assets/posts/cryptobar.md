@@ -6,9 +6,9 @@ author: "cmalf"
 image: /assets/img/Post/cryptobar/cryptobar.webp
 ---
 
-# CryptoBar – Real-Time Cryptocurrency Tracker for macOS Menu Bar
-
 ![CryptoBar Preview](/assets/img/Post/cryptobar/cryptobar.webp)
+
+# CryptoBar – Real-Time Cryptocurrency Tracker for macOS Menu Bar
 
 CryptoBar is a minimalist menu bar application that displays live cryptocurrency prices directly in your macOS menu bar.
 
