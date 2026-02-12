@@ -1,8 +1,8 @@
 ---
 title: The Perfect MacMini Hackintosh
-date: 2024-06-02 19:13:24 +07:00
+date: 2024-06-02
 description: Perfect Hackintosh HP Elitdesk 800 G4 DM 35W, with SMBIOS MACMINI 2018
-image: /assets/img/Post/hackmini/hackintosh.gif
+image: /assets/img/Post/hackmini/hackmini.webp
 author: "cmalf"
 ---
 
@@ -19,42 +19,43 @@ Transform your `HP EliteDesk 800 G4/G5 DM 35W/65W` into a `powerful Mac` with th
 ## My System Specs of My HP Elitdesk 800 G4 DM 35W
 
 ![HP ELITDESK](https://support.hp.com/wcc-assets/document/images/695/c06047206.png)
-### HP Elitdesk 800 G4 DM 35W 
+
+### HP Elitdesk 800 G4 DM 35W
 
 - Intel Core i5-8500T processor
-    - 2.1 GHz (up to 3.5 GHz with Intel Turbo Boost technology)
-    - 9 MB cache, 6 cores
-    - Supports Intel vPro Technology
+  - 2.1 GHz (up to 3.5 GHz with Intel Turbo Boost technology)
+  - 9 MB cache, 6 cores
+  - Supports Intel vPro Technology
 
 - Memory
-    - DDR4-2666 16GB 
-    - 16 GB total system memory (8 GB x 2)
-    - Manufacturer:	Samsung
+  - DDR4-2666 16GB
+  - 16 GB total system memory (8 GB x 2)
+  - Manufacturer: Samsung
 
 - Storage
-    - PCIe NVMe M.2 SSD drives
-        - 256 GB, M.2 2280, PCIe NVMe SSD
-        - Manufacturer:	Sandisk
-    - 2.5 in SATA SSD drives
-        - SATA 256 GB, SATA 6.0 Gb/s
-        - Manufacturer:	Samsung
+  - PCIe NVMe M.2 SSD drives
+    - 256 GB, M.2 2280, PCIe NVMe SSD
+    - Manufacturer: Sandisk
+  - 2.5 in SATA SSD drives
+    - SATA 256 GB, SATA 6.0 Gb/s
+    - Manufacturer: Samsung
 
 - Graphics
-    - Intel UHD Graphics 630
+  - Intel UHD Graphics 630
 
 - Ports, Adapters and cables
-    - (3) HP DisplayPort to DVI-D adapter
-    - USB
-        - (3) USB 3.1 Gen 1: (1) front; (2) rear
-        - (3) USB 3.1 Gen 2: (1) front, (2) rear
-        - (3) USB Type-C 3.1 Gen 2, (1) front; (1) rear: optional
+  - (3) HP DisplayPort to DVI-D adapter
+  - USB
+    - (3) USB 3.1 Gen 1: (1) front; (2) rear
+    - (3) USB 3.1 Gen 2: (1) front, (2) rear
+    - (3) USB Type-C 3.1 Gen 2, (1) front; (1) rear: optional
 - Networking/communications
-    - Ethernet (RJ-45) (integrated)
-        - Intel I219LM Gigabit Network Connection LOM (standard)
-    - Wireless LAN
-        - Intel 9560 802.11ac 2x2 Wi-Fi with Bluetooth M.2 Combo Card vPro
+  - Ethernet (RJ-45) (integrated)
+    - Intel I219LM Gigabit Network Connection LOM (standard)
+  - Wireless LAN
+    - Intel 9560 802.11ac 2x2 Wi-Fi with Bluetooth M.2 Combo Card vPro
 - Audio
-    - Conexant CX20632 Audio Codec
+  - Conexant CX20632 Audio Codec
 
 ## My Hacmini with Sonoma 14.5
 
@@ -62,11 +63,9 @@ Transform your `HP EliteDesk 800 G4/G5 DM 35W/65W` into a `powerful Mac` with th
 ![hackmini](/assets/img/Post/hackmini/hackmini1.png)
 ![hackmini](/assets/img/Post/hackmini/hackmini2.png)
 
-
 ## System info and About This Hack
 
 For other just check My github Repository [HP-EliteDesk-800-G4-G5-Hackintosh](https://github.com/cmalf/HP-EliteDesk-800-G4-G5-Hackintosh)
-
 
 ## What is not working
 
@@ -83,25 +82,26 @@ For other just check My github Repository [HP-EliteDesk-800-G4-G5-Hackintosh](ht
 - Audio (internal speaker and headphone jack)
 - Ethernet
 - Microphone / front-right audio port (tested with CTIA-style 4-connector headset)
-- Airport 
-- WIFI 
+- Airport
+- WIFI
 - BlueTooth (with USB-Port Modified As Dongle)
 - for wifi in sequoia (15 - 15.1.1) use `itlwm kext + Heliport` (airport not supported yet)
 
 ## Bios Settings
 
 You can see the bios setting with pdf.
+
 > Right Click the file pdf below and `Open Link In New Tab`
 
 - [Bios settings.pdf](/assets/img/Post/hackmini/HP-EliteDesk-800-G4-Mini-BIOS-Configuration.pdf)
 
-
 ## Here To Download the OS
 
- Here You can directly download `File Image Disk for Macos`
- if you dont have any mac system.
+Here You can directly download `File Image Disk for Macos`
+if you dont have any mac system.
 
-  You can download below!
+You can download below!
+
 - [MacOS Sequoia (15.1.1) 24B91](https://swcdn.apple.com/content/downloads/21/19/072-30111-A_4V7Y0VVH1Q/ie1hmy1uaj094z769s4zqmdaojp2vk4dkj/InstallAssistant.pkg)
 - [MacOS Sonoma (14.5) 23F79](https://swcdn.apple.com/content/downloads/32/06/062-01946-A_0PEP7JHIWA/1pfs4xh22555dj51fkep7w06s4eiezh21p/InstallAssistant.pkg)
 - [MacOS Ventura (13.6.7) 22G720](https://swcdn.apple.com/content/downloads/46/31/052-96247-A_MLN9N00Y8W/dmml3up52hrsb01krjtczmdhexiruv1b5m/InstallAssistant.pkg)
@@ -111,7 +111,6 @@ You can see the bios setting with pdf.
 For another version You can visit [Mr. Macintosh](https://mrmacintosh.com/)
 
 > Don't worry the Source link is Officially from Apple. `http://swcdn.apple.com/`
-
 
 ## My EFI with OC `Opencore`
 
@@ -124,7 +123,7 @@ For another version You can visit [Mr. Macintosh](https://mrmacintosh.com/)
 ## For Installation
 
 > Dont forget before installing Macos SONOMA and SEQUOIA set First `SecureBoot` to `Disable` For smooth Installation. You can set to `default` after installation.
-{: .prompt-tip }
+> {: .prompt-tip }
 
 ## Update ❗✎ᝰ. For Now Onwards
 
