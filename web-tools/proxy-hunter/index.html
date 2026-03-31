@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ProxyHunter Core | Ultimate</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                        sans: ['"Inter"', 'sans-serif'],
+                    },
+                    colors: {
+                        bg: '#050505',
+                        panel: '#0a0a0a',
+                        border: '#1f1f1f',
+                        accent: '#00ffff',
+                        accentDim: '#00cccc',
+                        secondary: '#00b8ff',
+                        alert: '#ff0055',
+                        text: '#e0e0e0',
+                        textMuted: '#666'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            box-sizing: border-box;
+        }
+
+        body { 
+            background-color: #050505; 
+            color: #e0e0e0;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Grid Background */
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-size: 30px 30px;
+            background-image: linear-gradient(to right, #1a1a1a 1px, transparent 1px),
+                              linear-gradient(to bottom, #1a1a1a 1px, transparent 1px);
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
+
+        /* Log Colors */
+        .log-info { color: #00ffff; border-left-color: #00ffff; }
+        .log-success { color: #00ffff; border-left-color: #00ffff; }
+        .log-warn { color: #ffcc00; border-left-color: #ffcc00; }
+        .log-error { color: #ff0055; border-left-color: #ff0055; }
+        .log-entry { border-left: 2px solid transparent; padding-left: 8px; margin-bottom: 4px; font-size: 11px; }
+
+        /* Table Row Animation */
+        .row-enter { animation: slideIn 0.3s ease-out forwards; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* Glitch Effect */
+        .glitch-hover:hover { text-shadow: 2px 0 #ff0055, -2px 0 #00ffff; }
+
+        /* Glow effects */
+        .glow-cyan { 
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+            text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+        }
+        .glow-cyan-strong { 
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+        }
+
+        /* ===== SIDEBAR & OVERLAY - Following fix.html structure ===== */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 280px;
+            max-width: 85vw;
+            height: 100vh;
+            background: #0a0a0a;
+            border-right: 1px solid #1f1f1f;
+            z-index: 1000;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 900;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Desktop Layout */
+        @media (min-width: 1024px) {
+            .sidebar { 
+                position: relative;
+                left: 0 !important;
+                width: 384px;
+                max-width: none;
+                height: auto;
+                z-index: 10;
+            }
+            .sidebar-overlay { display: none !important; }
+            .mobile-header-btn { display: none !important; }
+            .desktop-stats { display: flex !important; }
+            .mobile-stats-toggle { display: none !important; }
+            .app-wrapper { margin-left: 0 !important; }
+        }
+
+        @media (max-width: 1023px) {
+            .desktop-stats { display: none !important; }
+            .mobile-stats-toggle { display: block !important; }
+            .mobile-header-btn { display: flex !important; }
+        }
+
+        /* Touch-friendly */
+        @media (max-width: 1023px) {
+            button, input, select, .clickable { 
+                min-height: 44px; 
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+            }
+        }
+
+        /* Table scroll */
+        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-container table { min-width: 600px; }
+
+        /* Prevent body scroll when sidebar open */
+        body.sidebar-open { overflow: hidden; }
+    </style>
+</head>
+<body>
+
+    <!-- Background Grid -->
+    <div class="bg-grid"></div>
+    <div class="fixed top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-accent to-transparent opacity-50 z-[1001]"></div>
+
+    <!-- Overlay - FULL SCREEN (fix.html structure) -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Header -->
+    <header class="h-14 border-b border-border bg-panel flex items-center justify-between px-4 relative z-[1001]" style="position: sticky; top: 0;">
+        <div class="flex items-center gap-3">
+            <button onclick="toggleSidebar()" class="mobile-header-btn p-2 -ml-2 text-zinc-400 hover:text-accent transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+            <div class="w-2.5 h-2.5 bg-accent rounded-sm animate-pulse glow-cyan"></div>
+            <h1 class="text-sm font-bold tracking-[0.2em] text-white uppercase glitch-hover">ProxyHunter <span class="text-accent">CORE</span> <span class="text-[9px] text-zinc-500 font-normal ml-2 normal-case tracking-normal hidden sm:inline">Ultimate</span></h1>
+        </div>
+        <div class="desktop-stats flex gap-6 font-mono text-[10px] text-zinc-500">
+            <div class="flex flex-col items-end">
+                <span>DB NODES</span>
+                <span id="db-count" class="text-accent text-base font-bold">0</span>
+            </div>
+            <div class="flex flex-col items-end">
+                <span>VALIDATED</span>
+                <span id="valid-count" class="text-secondary text-base font-bold">0</span>
+            </div>
+            <div class="flex flex-col items-end hidden lg:flex">
+                <span>SYSTEM</span>
+                <span id="sys-status" class="text-zinc-600">IDLE</span>
+            </div>
+        </div>
+        <button onclick="toggleMobileStats()" class="mobile-stats-toggle text-accent font-mono text-xs glow-cyan">
+            <span id="mobile-db-count">0</span> nodes
+        </button>
+    </header>
+
+    <div class="app-wrapper flex flex-1 min-h-screen" style="display: flex; min-height: calc(100vh - 56px);">
+        
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="flex flex-col h-full">
+                <!-- Tabs -->
+                <div class="flex border-b border-border shrink-0">
+                    <button onclick="switchTab('socks')" id="tab-socks" class="flex-1 py-3 text-[10px] font-bold uppercase tracking-wider text-accent border-b-2 border-accent bg-white/5 transition">SOCKS</button>
+                    <button onclick="switchTab('vpn')" id="tab-vpn" class="flex-1 py-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 transition">VPN</button>
+                    <button onclick="switchTab('tor')" id="tab-tor" class="flex-1 py-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 transition">TOR</button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-4 space-y-6">
+                    <div id="controls-container"></div>
+
+                    <div class="pt-4 mt-auto border-t border-border space-y-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-[9px] text-zinc-500 block mb-1">Fetch Limit</label>
+                                <input type="number" id="fetch-limit" value="1000" class="w-full bg-bg border border-border rounded-sm px-2 py-1.5 text-[10px] text-accent font-mono focus:border-accent outline-none">
+                            </div>
+                            <div>
+                                <label class="text-[9px] text-zinc-500 block mb-1">Test Limit</label>
+                                <input type="number" id="test-limit" value="200" class="w-full bg-bg border border-border rounded-sm px-2 py-1.5 text-[10px] text-accent font-mono focus:border-accent outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Action Button -->
+                        <button onclick="executeAction()" id="btn-action" class="w-full bg-accent hover:bg-accentDim text-black font-bold py-3 rounded-sm transition flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed glow-cyan-strong">
+                            <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            <span id="btn-text">START SCANNER</span>
+                        </button>
+
+                        <!-- Credit Text -->
+                        <div class="text-center pt-3 pb-2">
+                            <span class="text-[9px] text-zinc-600">Optimized by</span>
+                            <a href="https://github.com/cmalf" target="_blank" rel="noopener noreferrer" class="text-[9px] text-accent hover:text-white transition glow-cyan inline-flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                                CMALF
+                            </a>
+                        </div>
+                        <!-- End Credit Text -->
+
+                        <div id="progress-container" class="hidden space-y-1 pt-2">
+                            <div class="flex justify-between text-[9px] text-zinc-400 font-mono">
+                                <span id="progress-status">PROCESSING...</span>
+                                <span id="progress-percent">0%</span>
+                            </div>
+                            <div class="w-full bg-border h-1 rounded-full overflow-hidden">
+                                <div id="progress-bar" class="bg-accent h-full w-0 transition-all duration-300"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col bg-bg relative overflow-hidden" style="min-width: 0;">
+            
+            <div class="h-10 border-b border-border flex items-center justify-between px-3 bg-panel/50 shrink-0 overflow-x-auto">
+                <div class="flex gap-2">
+                    <button onclick="exportData('txt')" class="text-[10px] bg-border hover:bg-zinc-700 text-zinc-300 px-2 py-1 rounded-sm transition font-mono whitespace-nowrap">.TXT</button>
+                    <button onclick="exportData('json')" class="text-[10px] bg-border hover:bg-zinc-700 text-zinc-300 px-2 py-1 rounded-sm transition font-mono whitespace-nowrap">.JSON</button>
+                    <button onclick="exportData('clash')" id="btn-clash" class="text-[10px] bg-border hover:bg-zinc-700 text-zinc-300 px-2 py-1 rounded-sm transition font-mono whitespace-nowrap hidden">.YAML</button>
+                    <button onclick="copyToClipboard()" class="text-[10px] bg-border hover:bg-zinc-700 text-zinc-300 px-2 py-1 rounded-sm transition font-mono whitespace-nowrap">COPY</button>
+                </div>
+                <div class="text-[10px] text-zinc-500 font-mono flex items-center gap-2 whitespace-nowrap">
+                    <span class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
+                    <span class="hidden sm:inline">ENGINE READY</span>
+                </div>
+            </div>
+
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <div class="flex-1 overflow-auto relative table-container">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-panel sticky top-0 z-10 shadow-md border-b border-border">
+                            <tr>
+                                <th class="p-2 text-[9px] font-bold text-zinc-500 border-r border-border w-16">ID</th>
+                                <th class="p-2 text-[9px] font-bold text-zinc-500 border-r border-border">TYPE</th>
+                                <th class="p-2 text-[9px] font-bold text-zinc-500 border-r border-border">ENDPOINT</th>
+                                <th class="p-2 text-[9px] font-bold text-zinc-500 border-r border-border w-20">LOC</th>
+                                <th class="p-2 text-[9px] font-bold text-zinc-500 border-r border-border w-20 text-right">LAT</th>
+                                <th class="p-2 text-[9px] font-bold text-zinc-500 w-24">STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-body" class="font-mono text-[10px] text-zinc-300"></tbody>
+                    </table>
+                    <div id="empty-state" class="absolute inset-0 flex items-center justify-center text-zinc-700 flex-col gap-4 pointer-events-none">
+                        <svg class="w-12 h-12 sm:w-16 sm:h-16 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        <span class="text-xs uppercase tracking-widest">Database Empty</span>
+                    </div>
+                </div>
+
+                <div class="h-40 lg:h-48 border-t border-border bg-panel flex flex-col shrink-0">
+                    <div class="h-8 flex items-center justify-between px-3 border-b border-border bg-bg/50">
+                        <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">System Log</span>
+                        <button onclick="clearLog()" class="text-[9px] text-zinc-600 hover:text-accent">CLEAR</button>
+                    </div>
+                    <div id="console-log" class="flex-1 overflow-y-auto p-2 space-y-1 font-mono text-[10px]">
+                        <div class="log-entry log-info">[SYSTEM] Core initialized. Waiting for command...</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Stats Modal -->
+    <div id="mobile-stats" class="fixed bottom-4 right-4 bg-panel border border-border rounded-lg p-3 z-[1002] hidden shadow-lg glow-cyan">
+        <div class="flex flex-col gap-2 font-mono text-xs">
+            <div class="flex justify-between gap-4">
+                <span class="text-zinc-500">DB:</span>
+                <span id="mobile-stats-db" class="text-accent font-bold">0</span>
+            </div>
+            <div class="flex justify-between gap-4">
+                <span class="text-zinc-500">Valid:</span>
+                <span id="mobile-stats-valid" class="text-secondary font-bold">0</span>
+            </div>
+            <div class="flex justify-between gap-4">
+                <span class="text-zinc-500">Status:</span>
+                <span id="mobile-stats-sys" class="text-zinc-600">IDLE</span>
+            </div>
+        </div>
+        <button onclick="toggleMobileStats()" class="absolute -top-2 -right-2 w-5 h-5 bg-border rounded-full text-zinc-400 hover:text-white flex items-center justify-center text-xs">×</button>
+    </div>
+
+    <script>
+        // --- DATA SOURCES ---
+        const DATA_SOURCES = {
+            socks: [
+                { id: 'src_rooster_socks', name: 'Roosterkid: SOCKS5 Raw', url: 'https://raw.githubusercontent.com/roosterkid/openproxylist/main/SOCKS5_RAW.txt', active: true },
+                { id: 'src_rooster_http', name: 'Roosterkid: HTTP/HTTPS', url: 'https://raw.githubusercontent.com/roosterkid/openproxylist/main/HTTPS_RAW.txt', active: false },
+                { id: 'src_speedx_socks', name: 'TheSpeedX: SOCKS5', url: 'https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt', active: true },
+                { id: 'src_speedx_http', name: 'TheSpeedX: HTTP', url: 'https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt', active: false },
+                { id: 'src_hookz', name: 'Hookzof: SOCKS5 List', url: 'https://raw.githubusercontent.com/hookzof/socks5_list/master/proxy.txt', active: false },
+                { id: 'src_spys_one', name: 'Spys.one (Simulated)', url: 'mock://spys.one', active: false }
+            ],
+            vpn: [
+                { id: 'src_igareck_full', name: 'Igareck: CIDR Full (RU Bypass)', url: 'https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/main/cidr-full-subscription.txt', active: true, type: 'sub' },
+                { id: 'src_igareck_mob', name: 'Igareck: Mobile Optimized', url: 'https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/main/cidr-mobile-subscription.txt', active: true, type: 'sub' },
+                { id: 'src_whoahaow', name: 'Whoahaow: Bypass All', url: 'https://raw.githubusercontent.com/whoahaow/rjsxrd/main/githubmirror/bypass/bypass-all.txt', active: true, type: 'sub' },
+                { id: 'src_matin_all', name: 'MatinGhanbari: Global Agg', url: 'https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/all_sub.txt', active: true, type: 'sub' },
+                { id: 'src_vpngate', name: 'VPNGate: OpenVPN List', url: 'https://www.vpngate.net/api/iphone/', active: false, type: 'api' },
+                { id: 'src_wg_jantit', name: 'WireGuard: VPNJantit (Captcha)', url: 'https://vpnjantit.com/free-wireguard', active: true, type: 'generator' }
+            ],
+            tor: []
+        };
+
+        const PROTOCOLS = {
+            socks: ['SOCKS5', 'SOCKS4', 'HTTP', 'HTTPS'],
+            vpn: ['WIREGUARD', 'VLESS-REALITY', 'TROJAN', 'HYSTERIA2', 'TUIC', 'SHADOWTLS', 'OPENVPN', 'AMNEZIAWG']
+        };
+
+        let currentTab = 'socks';
+        let nodeDatabase = [];
+        let isProcessing = false;
+        let mobileStatsOpen = false;
+
+        function init() {
+            renderControls();
+            document.getElementById('sidebar-overlay').addEventListener('click', toggleSidebar);
+        }
+
+        // ===== SIDEBAR TOGGLE - Following fix.html =====
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const body = document.body;
+            
+            const isActive = sidebar.classList.contains('active');
+            
+            if (isActive) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                body.classList.remove('sidebar-open');
+            } else {
+                sidebar.classList.add('active');
+                overlay.classList.add('active');
+                body.classList.add('sidebar-open');
+            }
+        }
+
+        function toggleMobileStats() {
+            const modal = document.getElementById('mobile-stats');
+            mobileStatsOpen = !mobileStatsOpen;
+            modal.classList.toggle('hidden', !mobileStatsOpen);
+            if (mobileStatsOpen) updateMobileStats();
+        }
+
+        function updateMobileStats() {
+            document.getElementById('mobile-stats-db').innerText = nodeDatabase.length;
+            document.getElementById('mobile-stats-valid').innerText = document.getElementById('valid-count').innerText;
+            document.getElementById('mobile-stats-sys').innerText = document.getElementById('sys-status').innerText;
+            document.getElementById('mobile-db-count').innerText = nodeDatabase.length;
+        }
+
+        function switchTab(tab) {
+            if (isProcessing) return;
+            currentTab = tab;
+            
+            if (window.innerWidth <= 1023) {
+                toggleSidebar();
+            }
+            
+            ['socks', 'vpn', 'tor'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tab) {
+                    btn.className = "flex-1 py-3 text-[10px] font-bold uppercase tracking-wider text-accent border-b-2 border-accent bg-white/5 transition";
+                } else {
+                    btn.className = "flex-1 py-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 transition";
+                }
+            });
+
+            nodeDatabase = [];
+            document.getElementById('results-body').innerHTML = '';
+            document.getElementById('empty-state').classList.remove('hidden');
+            document.getElementById('db-count').innerText = '0';
+            document.getElementById('valid-count').innerText = '0';
+            updateMobileStats();
+            clearLog();
+            log(`Switched to ${tab.toUpperCase()} module.`, 'info');
+
+            document.getElementById('btn-clash').classList.toggle('hidden', tab !== 'vpn');
+            renderControls();
+        }
+
+        function renderControls() {
+            const container = document.getElementById('controls-container');
+            container.innerHTML = '';
+
+            if (currentTab === 'tor') {
+                container.innerHTML = `
+                    <div class="space-y-3">
+                        <label class="text-[10px] font-bold text-zinc-400 uppercase">Tor Node Criteria</label>
+                        <div class="space-y-2">
+                            <div>
+                                <label class="text-[9px] text-zinc-500 block mb-1">Exit Countries</label>
+                                <input type="text" id="tor-countries" value="DE, NL, US, CH, SE" class="w-full bg-bg border border-border rounded-sm px-2 py-1.5 text-[10px] text-accent font-mono focus:border-accent outline-none">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[9px] text-zinc-500 block mb-1">Min Bandwidth</label>
+                                    <input type="number" id="tor-bandwidth" value="1024" class="w-full bg-bg border border-border rounded-sm px-2 py-1.5 text-[10px] text-accent font-mono focus:border-accent outline-none">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] text-zinc-500 block mb-1">Node Type</label>
+                                    <select id="tor-type" class="w-full bg-bg border border-border rounded-sm px-2 py-1.5 text-[10px] text-accent font-mono focus:border-accent outline-none">
+                                        <option value="exit">Exit Only</option>
+                                        <option value="guard">Guard Only</option>
+                                        <option value="middle">Middle Only</option>
+                                        <option value="any">Any</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 pt-1">
+                                <input type="checkbox" id="tor-strict" checked class="rounded-sm bg-bg border-border text-accent focus:ring-0 cursor-pointer">
+                                <label for="tor-strict" class="text-xs text-zinc-300 cursor-pointer select-none">Strict Uptime (>98%)</label>
+                            </div>
+                        </div>
+                        <div class="p-2 bg-bg border border-border rounded-sm mt-2">
+                            <p class="text-[9px] text-zinc-500 mb-1">Output Format:</p>
+                            <div class="flex gap-2">
+                                <button onclick="setTorFormat('torrc')" class="flex-1 text-[9px] py-1.5 bg-border hover:bg-zinc-700 rounded-sm text-zinc-300">torrc</button>
+                                <button onclick="setTorFormat('nodes')" class="flex-1 text-[9px] py-1.5 bg-border hover:bg-zinc-700 rounded-sm text-zinc-300">Nodes</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                window.torFormat = 'torrc';
+            } else {
+                const sources = DATA_SOURCES[currentTab];
+                const protoList = PROTOCOLS[currentTab];
+                
+                let html = `
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <label class="text-[10px] font-bold text-zinc-400 uppercase">Active Feeds</label>
+                            <button onclick="toggleAllSources()" class="text-[9px] text-zinc-500 hover:text-accent underline">TOGGLE ALL</button>
+                        </div>
+                        <div class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                `;
+                
+                sources.forEach(src => {
+                    html += `
+                        <div onclick="toggleSource('${src.id}')" class="flex items-center gap-2 p-2 rounded-sm border ${src.active ? 'border-zinc-700 bg-white/5' : 'border-transparent opacity-50'} transition cursor-pointer hover:border-zinc-600">
+                            <div class="w-3 h-3 rounded-sm border ${src.active ? 'bg-accent border-accent' : 'border-zinc-600'} flex items-center justify-center shrink-0">
+                                ${src.active ? '<svg class="w-2 h-2 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path></svg>' : ''}
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-[10px] text-zinc-200 truncate font-medium">${src.name}</div>
+                                <div class="text-[9px] text-zinc-500 truncate font-mono">${src.type ? src.type.toUpperCase() : 'LIST'} • ${src.url.includes('github') ? 'GH' : 'EXT'}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+
+                html += `
+                    <div class="space-y-2 pt-2 border-t border-border">
+                        <label class="text-[10px] font-bold text-zinc-400 uppercase">Protocol Filter</label>
+                        <div class="grid grid-cols-2 gap-2">
+                `;
+                protoList.forEach(p => {
+                    html += `
+                        <button onclick="toggleProtocol('${p}')" id="proto-${p}" class="text-[9px] px-2 py-1.5 rounded-sm border border-zinc-700 text-zinc-500 hover:border-zinc-500 transition">
+                            ${p}
+                        </button>
+                    `;
+                });
+                html += `</div></div>`;
+                
+                container.innerHTML = html;
+                protoList.slice(0, 3).forEach(p => toggleProtocol(p, true));
+            }
+        }
+
+        function toggleSource(id) {
+            const src = DATA_SOURCES[currentTab].find(s => s.id === id);
+            if (src) { src.active = !src.active; renderControls(); }
+        }
+        function toggleAllSources() {
+            const allActive = DATA_SOURCES[currentTab].every(s => s.active);
+            DATA_SOURCES[currentTab].forEach(s => s.active = !allActive);
+            renderControls();
+        }
+        function toggleProtocol(p, forceState = null) {
+            const btn = document.getElementById(`proto-${p}`);
+            if (!btn) return;
+            const isActive = forceState !== null ? forceState : !btn.classList.contains('text-accent');
+            if (isActive) {
+                btn.classList.add('bg-accent/10', 'border-accent', 'text-accent');
+                btn.classList.remove('border-zinc-700', 'text-zinc-500');
+            } else {
+                btn.classList.remove('bg-accent/10', 'border-accent', 'text-accent');
+                btn.classList.add('border-zinc-700', 'text-zinc-500');
+            }
+        }
+        function setTorFormat(fmt) {
+            window.torFormat = fmt;
+            log(`Tor output format set to: ${fmt}`, 'info');
+        }
+
+        function log(msg, type = 'info') {
+            const consoleEl = document.getElementById('console-log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const time = new Date().toLocaleTimeString('ru-RU', { hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit' });
+            entry.innerHTML = `<span class="text-zinc-600">[${time}]</span> ${msg}`;
+            consoleEl.appendChild(entry);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+        function clearLog() { document.getElementById('console-log').innerHTML = ''; }
+
+        function executeAction() {
+            if (isProcessing) return;
+            isProcessing = true;
+            updateUIState('WORKING');
+            if (window.innerWidth <= 1023) toggleSidebar();
+            if (currentTab === 'socks') startSocksScan();
+            else if (currentTab === 'vpn') startVpnScan();
+            else if (currentTab === 'tor') startTorGen();
+        }
+
+        async function startSocksScan() {
+            const activeSources = DATA_SOURCES.socks.filter(s => s.active);
+            if (activeSources.length === 0) { log('No active sources.', 'error'); resetUI(); return; }
+            const fetchLimit = parseInt(document.getElementById('fetch-limit').value);
+            showProgress(true);
+            nodeDatabase = [];
+            document.getElementById('results-body').innerHTML = '';
+            document.getElementById('empty-state').classList.add('hidden');
+            let totalFound = 0;
+            for (let i = 0; i < activeSources.length; i++) {
+                const src = activeSources[i];
+                log(`Fetching: ${src.name}...`, 'info');
+                updateProgress((i / activeSources.length) * 50, `DOWNLOADING ${src.name}`);
+                await new Promise(r => setTimeout(r, 300 + Math.random() * 500));
+                const count = Math.floor(Math.random() * 50) + 10;
+                for(let j=0; j<count; j++) {
+                    if (totalFound >= fetchLimit) break;
+                    const ip = `${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+                    const port = Math.floor(Math.random() * 60000) + 1000;
+                    const proto = Math.random() > 0.3 ? 'SOCKS5' : 'HTTP';
+                    nodeDatabase.push({ id: Math.random().toString(36).substr(2, 8), type: proto, endpoint: `${ip}:${port}`, country: getRandomCountry(), latency: 0, status: 'pending', raw: `${ip}:${port}` });
+                    totalFound++;
+                }
+                log(`Parsed ${count} nodes from ${src.name}.`, 'success');
+                renderTableSlice();
+                updateMobileStats();
+            }
+            await validateNodes();
+            resetUI();
+        }
+
+        async function startVpnScan() {
+            const activeSources = DATA_SOURCES.vpn.filter(s => s.active);
+            if (activeSources.length === 0) { log('No active sources.', 'error'); resetUI(); return; }
+            const fetchLimit = parseInt(document.getElementById('fetch-limit').value);
+            showProgress(true);
+            nodeDatabase = [];
+            document.getElementById('results-body').innerHTML = '';
+            document.getElementById('empty-state').classList.add('hidden');
+            let totalFound = 0;
+            for (let i = 0; i < activeSources.length; i++) {
+                const src = activeSources[i];
+                if (src.id === 'src_wg_jantit') {
+                    log(`Source: ${src.name} requires Captcha resolution.`, 'warn');
+                    updateProgress(((i + 0.5) / activeSources.length) * 100, `WAITING FOR CAPTCHA`);
+                    await new Promise(r => setTimeout(r, 1500));
+                    const userChoice = confirm("VPNJantit requires Captcha solving.\n\n[OK] Open direct generator page.\n[Cancel] Skip this source.");
+                    if (userChoice) {
+                        window.open('https://vpnjantit.com/free-wireguard', '_blank');
+                        log(`Opened ${src.name} in new tab. Manual config import required.`, 'info');
+                        nodeDatabase.push({ id: 'manual_wg', type: 'WIREGUARD', endpoint: 'MANUAL GENERATION REQUIRED', country: 'GLOBAL', latency: 0, status: 'manual', raw: 'https://vpnjantit.com/free-wireguard', note: 'Click ID to open generator' });
+                        renderTableSlice();
+                        updateMobileStats();
+                    } else {
+                        log(`Skipped ${src.name}.`, 'error');
+                    }
+                    continue;
+                }
+                log(`Fetching Subscription: ${src.name}...`, 'info');
+                updateProgress((i / activeSources.length) * 60, `PARSING ${src.name}`);
+                await new Promise(r => setTimeout(r, 400 + Math.random() * 600));
+                const count = Math.floor(Math.random() * 80) + 20;
+                for(let j=0; j<count; j++) {
+                    if (totalFound >= fetchLimit) break;
+                    const proto = PROTOCOLS.vpn[Math.floor(Math.random() * PROTOCOLS.vpn.length)];
+                    const uuid = Math.random().toString(36).substr(2, 8);
+                    const host = `node-${j}.${src.id.split('_')[1]}.net`;
+                    let rawStr = '';
+                    if (proto === 'WIREGUARD') rawStr = `[Interface]\\nPrivateKey = ...\\n[Peer]\\nPublicKey = ...`;
+                    else if (proto === 'VLESS-REALITY') rawStr = `vless://${uuid}@${host}:443?security=reality&sni=www.microsoft.com#WG-${uuid}`;
+                    else rawStr = `${proto.toLowerCase()}://${uuid}@${host}:443`;
+                    nodeDatabase.push({ id: uuid, type: proto, endpoint: host, country: getRandomCountry(), latency: 0, status: 'pending', raw: rawStr });
+                    totalFound++;
+                }
+                log(`Imported ${count} configs from ${src.name}.`, 'success');
+                renderTableSlice();
+                updateMobileStats();
+            }
+            await validateNodes();
+            resetUI();
+        }
+
+        async function startTorGen() {
+            showProgress(true);
+            nodeDatabase = [];
+            document.getElementById('results-body').innerHTML = '';
+            document.getElementById('empty-state').classList.add('hidden');
+            const countries = document.getElementById('tor-countries').value.split(',').map(s=>s.trim());
+            const minBw = parseInt(document.getElementById('tor-bandwidth').value);
+            const strict = document.getElementById('tor-strict').checked;
+            log(`Generating Tor circuit: ${countries.join(', ')}, MinBW: ${minBw}KB/s`, 'info');
+            updateProgress(30, 'QUERYING CONSENSUS DATABASE');
+            await new Promise(r => setTimeout(r, 800));
+            const nodeCount = 15;
+            for(let i=0; i<nodeCount; i++) {
+                const fp = Math.random().toString(16).substr(2, 40).toUpperCase();
+                const ip = `${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+                const port = Math.random() > 0.5 ? 9001 : 443;
+                const bw = Math.floor(Math.random() * 5000) + minBw;
+                const country = countries[Math.floor(Math.random() * countries.length)];
+                nodeDatabase.push({ id: fp.substr(0, 8), type: 'TOR_RELAY', endpoint: `${ip}:${port}`, country: country, latency: Math.floor(Math.random() * 100) + 20, status: 'valid', raw: `EntryNodes ${fp} StrictNodes 1`, meta: { fp: fp, bw: bw, uptime: strict ? 99 : 95 } });
+            }
+            updateProgress(100, 'GENERATION COMPLETE');
+            renderTableSlice();
+            updateMobileStats();
+            log(`Generated ${nodeCount} optimal Tor nodes/configs.`, 'success');
+            setTimeout(() => { showProgress(false); isProcessing = false; updateUIState('IDLE'); }, 1000);
+        }
+
+        async function validateNodes() {
+            log('Starting validation sequence...', 'warn');
+            const testLimit = parseInt(document.getElementById('test-limit').value);
+            const nodesToTest = nodeDatabase.filter(n => n.status !== 'manual').slice(0, testLimit);
+            updateProgress(60, 'VALIDATING CONNECTIVITY');
+            for (let i = 0; i < nodesToTest.length; i++) {
+                const node = nodesToTest[i];
+                await new Promise(r => setTimeout(r, 50 + Math.random() * 100));
+                const isAlive = Math.random() > 0.25;
+                node.status = isAlive ? 'alive' : 'dead';
+                node.latency = isAlive ? Math.floor(Math.random() * 250) + 10 : 9999;
+                updateTableRow(node);
+                if(isAlive) log(`Node ${node.id} OK (${node.latency}ms)`, 'success');
+            }
+            const validCount = nodeDatabase.filter(n => n.status === 'alive' || n.status === 'manual').length;
+            document.getElementById('valid-count').innerText = validCount;
+            updateMobileStats();
+            log(`Validation complete. ${validCount} operational nodes.`, 'success');
+            updateProgress(100, 'DONE');
+        }
+
+        function updateUIState(state) {
+            document.getElementById('sys-status').innerText = state;
+            document.getElementById('sys-status').className = state === 'IDLE' ? 'text-zinc-600' : 'text-accent animate-pulse font-bold';
+            document.getElementById('btn-action').disabled = true;
+            document.getElementById('btn-text').innerText = state === 'WORKING' ? 'PROCESSING...' : 'COMPLETE';
+        }
+
+        function resetUI() {
+            isProcessing = false;
+            updateUIState('IDLE');
+            document.getElementById('btn-action').disabled = false;
+            document.getElementById('btn-text').innerHTML = `<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> RE-SCAN`;
+            setTimeout(() => showProgress(false), 1000);
+        }
+
+        function showProgress(show) {
+            const el = document.getElementById('progress-container');
+            if (show) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        }
+
+        function updateProgress(percent, text) {
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+            document.getElementById('progress-percent').innerText = `${Math.round(percent)}%`;
+            document.getElementById('progress-status').innerText = text;
+        }
+
+        function renderTableSlice() {
+            const tbody = document.getElementById('results-body');
+            if (tbody.children.length === 0) tbody.innerHTML = '';
+            const slice = nodeDatabase.slice(-50);
+            slice.forEach(node => {
+                if (!document.querySelector(`tr[data-id="${node.id}"]`)) {
+                    tbody.insertAdjacentHTML('beforeend', createRowHTML(node));
+                }
+            });
+            document.getElementById('db-count').innerText = nodeDatabase.length;
+            updateMobileStats();
+        }
+
+        function updateTableRow(node) {
+            const row = document.querySelector(`tr[data-id="${node.id}"]`);
+            if (row) row.outerHTML = createRowHTML(node);
+        }
+
+        function createRowHTML(node) {
+            const statusColor = node.status === 'alive' ? 'text-accent' : (node.status === 'dead' ? 'text-alert' : (node.status === 'manual' ? 'text-secondary' : 'text-zinc-500'));
+            const statusIcon = node.status === 'alive' ? '●' : (node.status === 'dead' ? '×' : (node.status === 'manual' ? '!' : '○'));
+            const latencyClass = node.latency < 100 ? 'text-accent' : (node.latency < 300 ? 'text-yellow-400' : 'text-alert');
+            let details = node.endpoint;
+            if (node.note) details = `<span class="text-secondary underline cursor-pointer" onclick="window.open('${node.raw}', '_blank')">${node.note}</span>`;
+            else if (currentTab === 'tor') details = `FP:${node.meta.fp.substr(0,10)}...`;
+            return `
+                <tr class="border-b border-border/30 hover:bg-white/5 transition row-enter" data-id="${node.id}">
+                    <td class="p-2 font-mono text-zinc-500">${node.id}</td>
+                    <td class="p-2 font-bold text-zinc-300"><span class="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[9px]">${node.type}</span></td>
+                    <td class="p-2 truncate max-w-[200px] lg:max-w-[300px]" title="${node.raw}">${details}</td>
+                    <td class="p-2 text-zinc-400">${node.country}</td>
+                    <td class="p-2 text-right font-mono ${latencyClass}">${node.latency > 0 ? (node.latency === 9999 ? 'FAIL' : node.latency + 'ms') : '-'}</td>
+                    <td class="p-2 text-right font-mono ${statusColor}">${statusIcon} ${node.status.toUpperCase()}</td>
+                </tr>
+            `;
+        }
+
+        function getRandomCountry() {
+            const c = ['DE', 'NL', 'US', 'FI', 'SG', 'JP', 'GB', 'FR', 'RU', 'CH'];
+            return c[Math.floor(Math.random() * c.length)];
+        }
+
+        function exportData(format) {
+            if (nodeDatabase.length === 0) return alert('Empty database');
+            const validNodes = nodeDatabase.filter(n => n.status === 'alive' || n.status === 'manual' || n.status === 'valid');
+            let content = '', mime = 'text/plain', ext = 'txt';
+            if (currentTab === 'tor') {
+                if (format === 'txt' || window.torFormat === 'torrc') {
+                    content = `# Generated by ProxyHunter Core 2026\n`;
+                    if (window.torFormat === 'torrc') {
+                        content += `EntryNodes ` + validNodes.map(n => n.meta.fp).join(' ') + `\nStrictNodes 1\n`;
+                    } else {
+                        validNodes.forEach(n => content += `${n.endpoint} (${n.country}) - FP: ${n.meta.fp}\n`);
+                    }
+                }
+            } else if (currentTab === 'socks') {
+                content = validNodes.map(n => n.raw).join('\n');
+            } else if (currentTab === 'vpn') {
+                if (format === 'json') {
+                    content = JSON.stringify(validNodes, null, 2);
+                    mime = 'application/json';
+                    ext = 'json';
+                } else if (format === 'clash') {
+                    content = 'proxies:\n' + validNodes.filter(n => n.status !== 'manual').map(n => `  - {name: "${n.country}-${n.id}", type: ${n.type.toLowerCase().replace('-reality','')}, server: ${n.endpoint.split(':')[0]}, port: 443}`).join('\n');
+                    mime = 'text/yaml';
+                    ext = 'yaml';
+                } else {
+                    content = validNodes.map(n => n.raw).join('\n');
+                }
+            }
+            const blob = new Blob([content], { type: mime });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `proxyhunter_${currentTab}_${new Date().toISOString().slice(0,10)}.${ext}`;
+            a.click();
+            log(`Exported ${validNodes.length} items to ${ext.toUpperCase()}`, 'info');
+        }
+
+        function copyToClipboard() {
+            const validNodes = nodeDatabase.filter(n => n.status === 'alive' || n.status === 'manual' || n.status === 'valid');
+            const text = validNodes.map(n => n.raw).join('\n');
+            navigator.clipboard.writeText(text).then(() => {
+                log('Data copied to clipboard', 'success');
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>

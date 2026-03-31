@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SOLAR NEXUS • 2077</title>
+    <style>
+        :root {
+            --bg-color: #010113;
+            --orbit-color: rgba(0, 255, 255, 0.18);
+            --neon-cyan: #00ffff;
+        }
+
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            touch-action: none;
+        }
+
+        /* Custom Rocket Cursor – Desktop ONLY */
+        #custom-cursor {
+            position: fixed;
+            font-size: 28px;
+            pointer-events: none;
+            z-index: 9999;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 15px var(--neon-cyan), 0 0 30px var(--neon-cyan);
+            transform: translate(-50%, -50%);
+            display: none;
+            user-select: none;
+        }
+
+        /* Starfield */
+        #starfield {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Header - FIXED visibility & clickable link */
+        .header {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 100;
+            pointer-events: none;
+            padding: 0 10px;
+            max-width: 100%;
+        }
+        .header h1 {
+            font-size: clamp(1.5rem, 5vw, 3.2rem);
+            font-weight: 700;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan), 0 0 25px var(--neon-cyan), 0 0 40px var(--neon-cyan);
+            margin: 0;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        /* CMALF Credit - FIXED visibility & clickability */
+        .header .cmalf-credit {
+            display: inline-block;
+            margin-left: 8px;
+            vertical-align: middle;
+            pointer-events: auto;
+        }
+        .header .cmalf-credit a {
+            font-size: clamp(0.65rem, 2.2vw, 0.9rem);
+            letter-spacing: 2px;
+            color: var(--neon-cyan);
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 600;
+            text-shadow: 0 0 8px var(--neon-cyan), 0 0 15px var(--neon-cyan);
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: rgba(0, 255, 255, 0.08);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+        .header .cmalf-credit a:hover,
+        .header .cmalf-credit a:active {
+            color: #ffffff;
+            text-shadow: 0 0 15px var(--neon-cyan), 0 0 30px var(--neon-cyan);
+            background: rgba(0, 255, 255, 0.15);
+            border-color: var(--neon-cyan);
+        }
+        .header .cmalf-credit .github-icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+            filter: drop-shadow(0 0 5px var(--neon-cyan));
+        }
+        .header p {
+            font-size: clamp(0.7rem, 2vw, 1.1rem);
+            letter-spacing: 3px;
+            color: rgba(255,255,255,0.7);
+            text-shadow: 0 0 15px var(--neon-cyan);
+            margin-top: 6px;
+        }
+
+        /* ===== MOBILE SIDEBAR ===== */
+        .sidebar {
+            position: fixed;
+            left: -100%;
+            top: 0;
+            width: 300px;
+            max-width: 85vw;
+            height: 100vh;
+            background: rgba(1, 1, 19, 0.98);
+            border-right: 1px solid rgba(0, 255, 255, 0.4);
+            border-radius: 0 16px 16px 0;
+            padding: 70px 20px 24px 20px;
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.3);
+            z-index: 1000;
+            color: #fff;
+            overflow-y: auto;
+            transition: left 0.3s ease;
+            -webkit-overflow-scrolling: touch;
+        }
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 900;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: auto;
+        }
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .sidebar h2 {
+            font-size: 1.35rem;
+            letter-spacing: 4px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 12px var(--neon-cyan);
+        }
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .info-row:last-child { border-bottom: none; margin-bottom: 0; }
+        .planet-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            box-shadow: 0 0 12px currentColor;
+        }
+        .info-text strong { font-size: 1.05rem; display: block; margin-bottom: 4px; letter-spacing: 1px; }
+        .info-text p { font-size: 0.92rem; line-height: 1.35; color: rgba(255,255,255,0.85); margin: 0; }
+
+        /* Neon Scrollbar */
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-track { background: rgba(0, 255, 255, 0.1); border-radius: 10px; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 10px; box-shadow: 0 0 12px var(--neon-cyan); }
+
+        /* TOGGLE BUTTON - FIXED for mobile */
+        #toggle-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: rgba(1, 1, 19, 0.9);
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 10px 16px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 0 25px var(--neon-cyan);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 44px;
+            min-width: 44px;
+            touch-action: manipulation;
+            pointer-events: auto;
+        }
+        #toggle-btn:hover,
+        #toggle-btn:active {
+            background: rgba(0, 255, 255, 0.15);
+            box-shadow: 0 0 35px var(--neon-cyan);
+        }
+        #toggle-btn span.icon { font-size: 1.3rem; }
+
+        /* SOLAR SYSTEM */
+        #solar-system {
+            position: relative;
+            width: 100vmin;
+            height: 100vmin;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.4s ease;
+            pointer-events: none;
+        }
+        #solar-system > * {
+            pointer-events: auto;
+        }
+
+        /* Sun & Planets */
+        .sun {
+            position: absolute;
+            width: 68px;
+            height: 68px;
+            background: radial-gradient(circle, #ffd700, #ff8c00);
+            border-radius: 50%;
+            box-shadow: 0 0 40px #ff8c00, 0 0 80px rgba(255,140,0,0.7), 0 0 130px rgba(0,255,255,0.35);
+            z-index: 10;
+        }
+        .orbit {
+            position: absolute;
+            border: 1px solid var(--orbit-color);
+            border-radius: 50%;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px var(--neon-cyan);
+            pointer-events: none;
+        }
+        .planet-container {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            animation: orbit linear infinite;
+            pointer-events: auto;
+        }
+        .planet {
+            position: absolute;
+            top: 50%; right: 0;
+            transform: translate(50%, -50%);
+            border-radius: 50%;
+            box-shadow: 0 0 18px rgba(255,255,255,0.5), inset -4px -4px 12px rgba(0,0,0,0.6);
+            cursor: pointer;
+        }
+        .label {
+            position: absolute;
+            color: rgba(255,255,255,0.85);
+            font-size: 11px;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            text-shadow: 0 0 8px var(--neon-cyan);
+            pointer-events: none;
+        }
+        .moon-system, .moon-orbit-line, .moon {
+            position: absolute;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .moon-orbit-line {
+            border: 1px solid rgba(255,255,255,0.15);
+            animation: orbit linear infinite;
+        }
+        .moon {
+            box-shadow: 0 0 8px rgba(255,255,255,0.4);
+        }
+        @keyframes orbit { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+        /* ZOOM CONTROLS - FIXED for mobile touch */
+        #zoom-controls {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: auto;
+        }
+        .zoom-btn {
+            background: rgba(1, 1, 19, 0.95);
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 25px var(--neon-cyan);
+            cursor: pointer;
+            min-height: 52px;
+            min-width: 52px;
+            touch-action: manipulation;
+            pointer-events: auto;
+            transition: all 0.2s ease;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .zoom-btn:hover { 
+            background: rgba(0,255,255,0.2);
+            box-shadow: 0 0 40px var(--neon-cyan);
+        }
+        .zoom-btn:active { 
+            transform: scale(0.92);
+            background: rgba(0,255,255,0.3);
+        }
+
+        /* ===== MOBILE OPTIMIZATION ===== */
+        @media (max-width: 768px) {
+            .header { top: 15px; }
+            .header h1 { letter-spacing: 3px; }
+            .header .cmalf-credit { margin-left: 6px; }
+            #toggle-btn { 
+                top: 15px; 
+                left: 15px; 
+                padding: 10px 14px; 
+                font-size: 0.85rem;
+            }
+            #toggle-btn span#toggle-text { display: none; }
+            #solar-system { transform: scale(0.65) !important; }
+            #zoom-controls { bottom: 25px; right: 25px; }
+            .zoom-btn { 
+                width: 56px; 
+                height: 56px; 
+                font-size: 2.2rem;
+                border-width: 3px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #solar-system { transform: scale(0.55) !important; }
+            .header h1 { font-size: 1.3rem; letter-spacing: 2px; }
+            .header p { font-size: 0.65rem; letter-spacing: 1px; }
+            #zoom-controls { bottom: 20px; right: 20px; }
+            .zoom-btn { width: 54px; height: 54px; font-size: 2rem; }
+        }
+
+        /* Desktop */
+        @media (min-width: 769px) {
+            .sidebar { 
+                left: 20px !important;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 290px;
+                max-width: none;
+                height: 82vh;
+                border-radius: 16px;
+            }
+            .sidebar-overlay { display: none !important; }
+            #toggle-btn span#toggle-text { display: inline; }
+        }
+
+        /* Prevent body scroll when sidebar open */
+        body.sidebar-open { overflow: hidden; }
+    </style>
+</head>
+<body>
+
+    <!-- Rocket Cursor (desktop only) -->
+    <div id="custom-cursor">🚀</div>
+
+    <!-- Starfield -->
+    <canvas id="starfield"></canvas>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Header - FIXED -->
+    <div class="header">
+        <h1>SOLAR NEXUS</h1>
+        <span class="cmalf-credit">
+            <a href="https://github.com/cmalf" target="_blank" rel="noopener noreferrer" id="cmalf-link">
+                <svg class="github-icon" viewBox="0 0 24 24">
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                </svg>
+                Optimized by CMALF
+            </a>
+        </span>
+        <p>NEURAL HOLOGRAPHIC SIMULATION • 2077</p>
+    </div>
+
+    <!-- Toggle Sidebar Button -->
+    <button id="toggle-btn" type="button" aria-label="Toggle sidebar">
+        <span class="icon">☰</span>
+        <span id="toggle-text">INFO</span>
+    </button>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <h2>SYSTEM OVERVIEW</h2>
+        <div class="info-row">
+            <div class="planet-dot" style="background:#ffcc33"></div>
+            <div class="info-text"><strong>Sun</strong><p>The luminous heart of our solar system. A G-type main-sequence star that powers every planet with light and heat.</p></div>
+        </div>
+        <div class="info-row">
+            <div class="planet-dot" style="background:#A5A5A5"></div>
+            <div class="info-text"><strong>Mercury</strong><p>Smallest planet and closest to the Sun. Extreme temperatures swing between scorching days and freezing nights.</p></div>
+        </div>
+        <div class="info-row">
+            <div class="planet-dot" style="background:#E3BB76"></div>
+            <div class="info-text"><strong>Venus</strong><p>Earth's twin in size but a toxic greenhouse world with surface temperatures hot enough to melt lead.</p></div>
+        </div>
+        <div class="info-row">
+            <div class="planet-dot" style="background:#22A6ED"></div>
+            <div class="info-text"><strong>Earth</strong><p>Our blue home — the only known planet with liquid water and abundant life.</p></div>
+        </div>
+        <div class="info-row">
+            <div class="planet-dot" style="background:#DD4C22"></div>
+            <div class="info-text"><strong>Mars</strong><p>The Red Planet. Iron-rich soil and ancient riverbeds hint at a once-wet world.</p></div>
+        </div>
+        <div class="info-row">
+            <div class="planet-dot" style="background:#D6A566"></div>
+            <div class="info-text"><strong>Jupiter</strong><p>Largest planet in the solar system. A gas giant with the Great Red Spot — a storm larger than Earth.</p></div>
+        </div>
+        <div class="info-row">
+            <div class="planet-dot" style="background:#F4D03F"></div>
+            <div class="info-text"><strong>Saturn</strong><p>Famous for its breathtaking ring system made of ice, rock, and dust.</p></div>
+        </div>
+        <div class="info-row">
+            <div class="planet-dot" style="background:#82E0AA"></div>
+            <div class="info-text"><strong>Uranus</strong><p>Ice giant tilted on its side. Faint rings and extreme seasonal changes.</p></div>
+        </div>
+        <div class="info-row">
+            <div class="planet-dot" style="background:#5DADE2"></div>
+            <div class="info-text"><strong>Neptune</strong><p>Deep-blue ice giant with the fastest winds in the solar system.</p></div>
+        </div>
+    </div>
+
+    <!-- Solar System -->
+    <div id="solar-system">
+        <div class="sun"></div>
+    </div>
+
+    <!-- Zoom Controls - FIXED -->
+    <div id="zoom-controls">
+        <button class="zoom-btn" id="zoom-in" type="button" aria-label="Zoom in">+</button>
+        <button class="zoom-btn" id="zoom-out" type="button" aria-label="Zoom out">−</button>
+    </div>
+
+    <script>
+        const solarSystemData = [
+            { name: "Mercury", size: 8, color: "#A5A5A5", orbitRadius: 100, orbitSpeed: 4, moons: [] },
+            { name: "Venus",   size: 14, color: "#E3BB76", orbitRadius: 150, orbitSpeed: 7, moons: [] },
+            { name: "Earth",   size: 15, color: "#22A6ED", orbitRadius: 210, orbitSpeed: 10, moons: [{ size: 3, radius: 18, speed: 1, color: "#ddd" }] },
+            { name: "Mars",    size: 10, color: "#DD4C22", orbitRadius: 270, orbitSpeed: 15, moons: [{ size: 2, radius: 12, speed: 0.8, color: "#aaa" }, { size: 1.5, radius: 16, speed: 1.2, color: "#aaa" }] },
+            { name: "Jupiter", size: 40, color: "#D6A566", orbitRadius: 380, orbitSpeed: 30, moons: [{ size: 3, radius: 28, speed: 1.5, color: "#eec" }, { size: 2.5, radius: 34, speed: 2.5, color: "#ddd" }, { size: 4, radius: 42, speed: 4, color: "#ccc" }, { size: 3.5, radius: 50, speed: 6, color: "#bbb" }] },
+            { name: "Saturn",  size: 35, color: "#F4D03F", orbitRadius: 500, orbitSpeed: 45, moons: [{ size: 4, radius: 45, speed: 3, color: "#eec" }, { size: 2, radius: 35, speed: 2, color: "#ddd" }, { size: 1.5, radius: 28, speed: 1.5, color: "#ccc" }], ring: true },
+            { name: "Uranus",  size: 20, color: "#82E0AA", orbitRadius: 600, orbitSpeed: 60, moons: [{ size: 2, radius: 22, speed: 2, color: "#ddd" }, { size: 2, radius: 28, speed: 3, color: "#ddd" }] },
+            { name: "Neptune", size: 19, color: "#5DADE2", orbitRadius: 700, orbitSpeed: 80, moons: [{ size: 3, radius: 25, speed: 2.5, color: "#eee" }] }
+        ];
+
+        const container = document.getElementById('solar-system');
+        let currentScale = 0.65;
+
+        // ==================== STARFIELD ====================
+        const starCanvas = document.getElementById('starfield');
+        const ctx = starCanvas.getContext('2d');
+        let stars = [], mouseX = 0, mouseY = 0;
+
+        function resizeCanvas() {
+            starCanvas.width = window.innerWidth;
+            starCanvas.height = window.innerHeight;
+        }
+        function initStars() {
+            stars = [];
+            for (let i = 0; i < 1300; i++) {
+                const x = Math.random() * starCanvas.width;
+                const y = Math.random() * starCanvas.height;
+                stars.push({ x, y, originalX: x, originalY: y, radius: Math.random()*1.8+0.4, speed: Math.random()*0.03+0.008, phase: Math.random()*Math.PI*2 });
+            }
+        }
+        function drawStars() {
+            ctx.clearRect(0,0,starCanvas.width,starCanvas.height);
+            const t = Date.now()/1000;
+            for (let star of stars) {
+                const dx = star.x - mouseX, dy = star.y - mouseY, distance = Math.hypot(dx, dy);
+                let fx = 0, fy = 0;
+                if (distance < 110 && distance > 1) {
+                    const force = (110 - distance) / 110 * 3.2;
+                    fx += (dx / distance) * force;
+                    fy += (dy / distance) * force;
+                }
+                const spring = 0.085;
+                fx += (star.originalX - star.x) * spring;
+                fy += (star.originalY - star.y) * spring;
+                star.x += fx * 0.85;
+                star.y += fy * 0.85;
+
+                const alpha = 0.7 + Math.sin(t * star.speed + star.phase) * 0.3;
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI*2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+            requestAnimationFrame(drawStars);
+        }
+
+        // Mouse & Cursor (Desktop only)
+        const customCursor = document.getElementById('custom-cursor');
+        document.addEventListener('mousemove', e => {
+            mouseX = e.clientX; mouseY = e.clientY;
+            if (window.innerWidth > 768) {
+                customCursor.style.left = `${e.clientX}px`;
+                customCursor.style.top = `${e.clientY}px`;
+                customCursor.style.display = 'block';
+            }
+        });
+
+        // ==================== MOBILE SIDEBAR TOGGLE ====================
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        function toggleSidebar() {
+            const isActive = sidebar.classList.contains('active');
+            
+            if (isActive) {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+                document.body.classList.remove('sidebar-open');
+            } else {
+                sidebar.classList.add('active');
+                sidebarOverlay.classList.add('active');
+                document.body.classList.add('sidebar-open');
+            }
+        }
+
+        toggleBtn.addEventListener('click', toggleSidebar);
+        toggleBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            toggleSidebar();
+        });
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            toggleSidebar();
+        });
+
+        // Desktop sidebar behavior
+        if (window.innerWidth > 768) {
+            sidebar.classList.add('active');
+        }
+
+        // ==================== ZOOM IN / OUT - FIXED FOR MOBILE ====================
+        const zoomInBtn = document.getElementById('zoom-in');
+        const zoomOutBtn = document.getElementById('zoom-out');
+
+        function updateScale() {
+            container.style.transform = `scale(${currentScale})`;
+        }
+
+        // Click event (desktop)
+        zoomInBtn.addEventListener('click', () => {
+            currentScale = Math.min(currentScale * 1.18, 1.4);
+            updateScale();
+        });
+        zoomOutBtn.addEventListener('click', () => {
+            currentScale = Math.max(currentScale * 0.85, 0.45);
+            updateScale();
+        });
+
+        // Touch events (mobile) - FIXED
+        zoomInBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            currentScale = Math.min(currentScale * 1.18, 1.4);
+            updateScale();
+            zoomInBtn.style.transform = 'scale(0.92)';
+            setTimeout(() => { zoomInBtn.style.transform = 'scale(1)'; }, 150);
+        });
+        zoomOutBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            currentScale = Math.max(currentScale * 0.85, 0.45);
+            updateScale();
+            zoomOutBtn.style.transform = 'scale(0.92)';
+            setTimeout(() => { zoomOutBtn.style.transform = 'scale(1)'; }, 150);
+        });
+
+        // ==================== BUILD PLANETS ====================
+        solarSystemData.forEach(planetData => {
+            const orbitRing = document.createElement('div');
+            orbitRing.className = 'orbit';
+            orbitRing.style.width = `${planetData.orbitRadius * 2}px`;
+            orbitRing.style.height = `${planetData.orbitRadius * 2}px`;
+            container.appendChild(orbitRing);
+
+            const planetContainer = document.createElement('div');
+            planetContainer.className = 'planet-container';
+            planetContainer.style.width = `${planetData.orbitRadius * 2}px`;
+            planetContainer.style.height = `${planetData.orbitRadius * 2}px`;
+            planetContainer.style.animationDuration = `${planetData.orbitSpeed}s`;
+            container.appendChild(planetContainer);
+
+            const planetBody = document.createElement('div');
+            planetBody.className = 'planet';
+            planetBody.style.width = `${planetData.size}px`;
+            planetBody.style.height = `${planetData.size}px`;
+            planetBody.style.backgroundColor = planetData.color;
+
+            if (planetData.ring) {
+                const ring = document.createElement('div');
+                ring.style.position = 'absolute';
+                ring.style.top = '50%'; ring.style.left = '50%';
+                ring.style.transform = 'translate(-50%, -50%) rotateX(68deg)';
+                ring.style.width = `${planetData.size * 3.2}px`;
+                ring.style.height = `${planetData.size * 1.15}px`;
+                ring.style.border = '4px solid rgba(255, 230, 120, 0.75)';
+                ring.style.borderRadius = '50%';
+                ring.style.boxShadow = '0 0 25px rgba(255, 230, 120, 0.7)';
+                planetBody.appendChild(ring);
+            }
+
+            const label = document.createElement('div');
+            label.className = 'label';
+            label.innerText = planetData.name;
+            planetBody.appendChild(label);
+            planetContainer.appendChild(planetBody);
+
+            planetData.moons.forEach(moonData => {
+                const moonSystem = document.createElement('div');
+                moonSystem.className = 'moon-system';
+                moonSystem.style.width = `${moonData.radius * 2}px`;
+                moonSystem.style.height = `${moonData.radius * 2}px`;
+                moonSystem.style.animationDuration = `${moonData.speed}s`;
+
+                const moonOrbitLine = document.createElement('div');
+                moonOrbitLine.className = 'moon-orbit-line';
+                moonOrbitLine.style.width = `${moonData.radius * 2}px`;
+                moonOrbitLine.style.height = `${moonData.radius * 2}px`;
+                moonSystem.appendChild(moonOrbitLine);
+
+                const moonBody = document.createElement('div');
+                moonBody.className = 'moon';
+                moonBody.style.width = `${moonData.size}px`;
+                moonBody.style.height = `${moonData.size}px`;
+                moonBody.style.backgroundColor = moonData.color;
+                moonSystem.appendChild(moonBody);
+
+                planetBody.appendChild(moonSystem);
+            });
+        });
+
+        // ==================== INIT ====================
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            initStars();
+            if (window.innerWidth > 768) {
+                sidebar.classList.add('active');
+                sidebarOverlay.classList.remove('active');
+                document.body.classList.remove('sidebar-open');
+            }
+        });
+        resizeCanvas();
+        initStars();
+        drawStars();
+        updateScale();
+    </script>
+</body>
+</html>
