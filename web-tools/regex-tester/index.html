@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Regex Tester</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fafafa;color:#111}
+.wrap{max-width:900px;margin:0 auto;padding:24px 18px 40px}h1{font-size:22px;margin:0 0 6px}p{color:#666;margin:0 0 18px;line-height:1.6}
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.04)}
+input,textarea,select{width:100%;padding:11px 13px;border:1px solid #ddd;border-radius:10px;font:inherit;font-size:15px;outline:none}input:focus,textarea:focus{border-color:#0095f6}
+.pattern{display:grid;grid-template-columns:1fr auto;gap:10px}.flags{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:14px}.flags label{display:flex;gap:6px;align-items:center;width:auto}
+textarea{min-height:150px;line-height:1.6}.result{min-height:120px;white-space:pre-wrap;word-break:break-word;line-height:1.8;padding:14px;background:#fafafa;border-radius:10px;border:1px solid #eee}
+mark{background:#fde68a;border-radius:4px;padding:0 2px}.group{color:#0095f6;font-weight:600}
+button{background:#111;color:#fff;border:none;border-radius:10px;padding:10px 18px;font:inherit;cursor:pointer}button:hover{opacity:.85}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{text-align:left;padding:8px;border-bottom:1px solid #eee;vertical-align:top}
+.err{color:#dc2626}.ok{color:#059669}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Regex Tester</h1>
+<p>Uji pola regex JavaScript secara live. Cocok buat validasi email, username, URL, sampai parsing teks.</p>
+<div class="card">
+<div class="pattern"><input id="pattern" value="\b[\w.-]+@[\w.-]+\.\w{2,}\b" placeholder="Tulis pola regex, mis. ^[a-z0-9_]{3,16}$" spellcheck="false"><button onclick="runTest()">Uji</button></div>
+<div class="flags">
+<label><input type="checkbox" id="flagG" checked> g — global</label>
+<label><input type="checkbox" id="flagI"> i — tanpa peduli huruf besar/kecil</label>
+<label><input type="checkbox" id="flagM"> m — multiline</label>
+<label><input type="checkbox" id="flagS"> s — dotall</label>
+</div>
+<p id="error" class="err"></p>
+</div>
+<div class="card">
+<label><b>Teks uji</b></label>
+<textarea id="text" oninput="runTest()" spellcheck="false">Hubungi kami di halo@cmalf.dev atau support@example.com.
+Username: cmalf_123 dan user-99.
+Tanggal: 2026-11-01, harga Rp150000.</textarea>
+</div>
+<div class="card">
+<div id="summary"><b>0 kecocokan</b></div>
+<div class="result" id="highlight"></div>
+<h3>Detail kecocokan</h3>
+<div id="details">Belum ada hasil.</div>
+<h3>Cheat sheet cepat</h3>
+<table>
+<tr><td><code>\d</code></td><td>Digit 0–9</td><td><code>^ … $</code></td><td>Awal / akhir teks</td></tr>
+<tr><td><code>\w</code></td><td>Huruf, digit, _</td><td><code>+ * ? {n,m}</code></td><td>Pengulangan</td></tr>
+<tr><td><code>\s</code></td><td>Spasi / tab / baris baru</td><td><code>( ) [ ] |</code></td><td>Grup / pilihan</td></tr>
+</table>
+</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function getRegex(){
+  let flags='';
+  if($('flagG').checked) flags+='g';
+  if($('flagI').checked) flags+='i';
+  if($('flagM').checked) flags+='m';
+  if($('flagS').checked) flags+='s';
+  return new RegExp($('pattern').value,flags);
+}
+function runTest(){
+  const text=$('text').value;
+  try{
+    const re=getRegex();
+    $('error').textContent='';
+    const matches=[...text.matchAll(new RegExp(re.source,re.flags.includes('g')?re.flags:re.flags+'g'))];
+    $('summary').innerHTML='<b>'+matches.length+' kecocokan</b> ditemukan.';
+    if(!matches.length){$('highlight').textContent=text;$('details').textContent='Tidak ada yang cocok dengan pola ini.';return;}
+    let html='',last=0;
+    matches.forEach(m=>{html+=esc(text.slice(last,m.index))+'<mark>'+esc(m[0])+'</mark>';last=m.index+m[0].length;});
+    html+=esc(text.slice(last));
+    $('highlight').innerHTML=html;
+    $('details').innerHTML=matches.map((m,i)=>'<div><b>#'+(i+1)+'</b> <code>'+esc(m[0])+'</code> <span style="color:#666">di posisi '+m.index+(m.length>1?' · grup: '+m.slice(1).map(g=>esc(g??'')).join(', '):'')+'</span></div>').join('');
+  }catch(e){
+    $('error').textContent='Regex tidak valid: '+e.message;
+    $('summary').textContent='Perbaiki pola regex dulu.';
+    $('highlight').textContent=text;
+  }
+}
+document.querySelectorAll('#pattern,#flagG,#flagI,#flagM,#flagS').forEach(el=>el.addEventListener('input',runTest));
+runTest();
+</script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timestamp &amp; Cron Converter</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0e1014;color:#e7e9ee}
+.wrap{max-width:900px;margin:0 auto;padding:24px 18px 40px}h1{font-size:22px;margin:0 0 6px}h2{font-size:17px;margin:0 0 12px}p{color:#9aa3b2;line-height:1.6}
+.card{background:#171a21;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:18px;margin:14px 0}
+label{display:block;font-size:13px;color:#9aa3b2;margin:10px 0 6px}input{width:100%;padding:11px 13px;border:1px solid rgba(255,255,255,.15);border-radius:10px;background:#0e1014;color:#e7e9ee;font:inherit;font-size:15px;outline:none}input:focus{border-color:#7dd3fc}
+button{background:#0095f6;color:#fff;border:none;border-radius:10px;padding:10px 16px;font:inherit;cursor:pointer;margin:6px 6px 0 0}button.secondary{background:#2a303e}
+.out{background:#0e1014;border-radius:10px;padding:13px;margin-top:12px;line-height:1.7;font-size:15px}.muted{color:#9aa3b2}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:700px){.grid{grid-template-columns:1fr}}
+code{background:#2a303e;padding:2px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>⏱️ Timestamp &amp; Cron Converter</h1>
+<p>Ubah Unix timestamp ke tanggal WIB dan sebaliknya, plus baca cron jadi kalimat yang gampang dimengerti.</p>
+<div class="card">
+<h2>Waktu sekarang</h2>
+<div class="out" id="now">—</div>
+<button onclick="useNow()">Pakai waktu sekarang</button>
+</div>
+<div class="grid">
+<div class="card">
+<h2>Timestamp → Tanggal</h2>
+<label>Timestamp (detik / milidetik)</label>
+<input id="ts" value="1761960000" inputmode="numeric">
+<button onclick="tsToDate()">Konversi</button>
+<div class="out" id="tsOut">—</div>
+</div>
+<div class="card">
+<h2>Tanggal → Timestamp</h2>
+<label>Tanggal &amp; waktu (WIB)</label>
+<input id="dt" type="datetime-local">
+<button onclick="dateToTs()">Konversi</button>
+<div class="out" id="dtOut">—</div>
+</div>
+</div>
+<div class="card">
+<h2>Cron → Bahasa manusia</h2>
+<label>Cron (menit jam tanggal bulan hari)</label>
+<input id="cron" value="0 7 * * *" placeholder="mis. 0 7 * * *">
+<button onclick="explainCron()">Jelaskan</button>
+<div class="out" id="cronOut">—</div>
+<p class="muted">Contoh: <code>*/15 * * * *</code> = tiap 15 menit · <code>0 0 * * 1</code> = tiap Senin tengah malam · <code>0 7 1 * *</code> = tiap tanggal 1 jam 7 pagi.</p>
+</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const fmt=new Intl.DateTimeFormat('id-ID',{dateStyle:'full',timeStyle:'medium',timeZone:'Asia/Jakarta'});
+const fmtUTC=new Intl.DateTimeFormat('id-ID',{dateStyle:'full',timeStyle:'medium',timeZone:'UTC'});
+function tick(){
+  const n=new Date();
+  $('now').innerHTML='<b>'+fmt.format(n)+' WIB</b><br><span class="muted">Unix detik: '+Math.floor(n.getTime()/1000)+' · milidetik: '+n.getTime()+' · UTC: '+fmtUTC.format(n)+'</span>';
+}
+setInterval(tick,1000);tick();
+function useNow(){$('ts').value=Math.floor(Date.now()/1000);tsToDate();}
+function tsToDate(){
+  let v=Number($('ts').value);
+  if(!v) return $('tsOut').textContent='Masukkan angka timestamp yang valid.';
+  if(v<1e11) v*=1000;
+  const d=new Date(v);
+  if(isNaN(d)) return $('tsOut').textContent='Timestamp tidak valid.';
+  $('tsOut').innerHTML='<b>'+fmt.format(d)+' WIB</b><br><span class="muted">UTC: '+fmtUTC.format(d)+'<br>ISO: '+d.toISOString()+'</span>';
+}
+function dateToTs(){
+  const v=$('dt').value;
+  if(!v) return $('dtOut').textContent='Pilih tanggal dulu.';
+  const d=new Date(v);
+  $('dtOut').innerHTML='Unix detik: <b>'+Math.floor(d.getTime()/1000)+'</b><br>Unix milidetik: <b>'+d.getTime()+'</b><br><span class="muted">Catatan: input datetime-local dibaca sebagai waktu lokal perangkat.</span>';
+}
+function fieldDesc(v,name){
+  if(v==='*') return 'setiap '+name;
+  if(v.startsWith('*/')) return 'setiap '+v.slice(2)+' '+name;
+  return 'pada '+name+' '+v;
+}
+function explainCron(){
+  const parts=$('cron').value.trim().split(/\s+/);
+  if(parts.length!==5) return $('cronOut').textContent='Cron harus 5 field: menit jam tanggal bulan hari.';
+  const days=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  let day=parts[4];
+  if(day!=='*' && !isNaN(day)) day=days[Number(day)]||day;
+  $('cronOut').innerHTML='Jalan <b>'+fieldDesc(parts[0],'menit')+', '+fieldDesc(parts[1],'jam')+'</b>, tanggal '+parts[2]+', bulan '+parts[3]+', hari <b>'+day+'</b>.<br><span class="muted">Cron: <code>'+parts.join(' ')+'</code></span>';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Password Generator Offline</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fafafa;color:#111}
+.wrap{max-width:720px;margin:0 auto;padding:24px 18px 40px}h1{font-size:22px;margin:0 0 6px}p{color:#666;line-height:1.6}
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:16px;padding:20px;box-shadow:0 4px 20px rgba(0,0,0,.04)}
+.pw{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:20px;word-break:break-all;background:#f5f5f5;border-radius:12px;padding:16px;min-height:60px}
+button{background:#111;color:#fff;border:none;border-radius:10px;padding:11px 18px;font:inherit;cursor:pointer;margin:6px 6px 0 0}button.secondary{background:#efefef;color:#111}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0}
+input[type=range]{flex:1}input[type=checkbox]{width:18px;height:18px}
+.bar{height:10px;background:#eee;border-radius:99px;overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;background:#22c55e;transition:width .2s}
+.note{font-size:13px;color:#888;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🔐 Password Generator</h1>
+<p>Dibuat sepenuhnya di perangkatmu pakai <code>crypto.getRandomValues</code> — tidak ada password yang dikirim ke server manapun.</p>
+<div class="card">
+<div class="pw" id="pw">Klik Generate dulu…</div>
+<div class="bar"><i id="strengthBar" style="width:0%"></i></div>
+<div id="strengthText" style="margin-top:8px;font-weight:600">—</div>
+<div style="margin-top:16px">
+<button onclick="generate()">Generate</button>
+<button class="secondary" onclick="copyPw()">Salin</button>
+</div>
+<div class="row"><span>Panjang: <b id="lenLabel">16</b> karakter</span><input type="range" id="len" min="8" max="64" value="16" oninput="$('lenLabel').textContent=this.value;generate()"></div>
+<div class="row"><span>Huruf besar (A–Z)</span><input type="checkbox" id="upper" checked onchange="generate()"></div>
+<div class="row"><span>Huruf kecil (a–z)</span><input type="checkbox" id="lower" checked onchange="generate()"></div>
+<div class="row"><span>Angka (0–9)</span><input type="checkbox" id="digits" checked onchange="generate()"></div>
+<div class="row"><span>Simbol (!@#$…)</span><input type="checkbox" id="symbols" checked onchange="generate()"></div>
+<div class="row"><span>Hindari karakter mirip (l, 1, I, O, 0)</span><input type="checkbox" id="noSimilar" onchange="generate()"></div>
+<p class="note">Tips: pakai minimal 16 karakter untuk akun penting, simpan di password manager, dan jangan pakai ulang password yang sama di banyak situs.</p>
+</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+function secureRandom(n){
+  const a=new Uint32Array(n);
+  crypto.getRandomValues(a);
+  return a;
+}
+function generate(){
+  let sets=[];
+  if($('lower').checked) sets.push('abcdefghijklmnopqrstuvwxyz');
+  if($('upper').checked) sets.push('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+  if($('digits').checked) sets.push('0123456789');
+  if($('symbols').checked) sets.push('!@#$%^&*()-_=+[]{};:,.<>?');
+  if(!sets.length){$('pw').textContent='Pilih minimal satu jenis karakter.';return;}
+  let pool=sets.join('');
+  if($('noSimilar').checked) pool=pool.replace(/[l1IO0]/g,'');
+  const len=Number($('len').value);
+  const rnd=secureRandom(len);
+  let out='';
+  // Pastikan tiap jenis yang dipilih muncul minimal sekali
+  sets.forEach(s=>{
+    const clean=$('noSimilar').checked?s.replace(/[l1IO0]/g,''):s;
+    if(clean) out+=clean[rnd[out.length%len]%clean.length];
+  });
+  for(let i=out.length;i<len;i++) out+=pool[rnd[i]%pool.length];
+  out=out.split('').sort(()=>Math.random()-0.5).join('');
+  $('pw').textContent=out;
+  // Estimasi kekuatan kasar dari panjang + variasi karakter
+  const entropy=Math.log2(pool.length)*len;
+  const pct=Math.min(100,Math.round(entropy/1.2));
+  $('strengthBar').style.width=pct+'%';
+  $('strengthBar').style.background=entropy<50?'#ef4444':entropy<80?'#f59e0b':'#22c55e';
+  $('strengthText').textContent=(entropy<50?'Lemah':entropy<80?'Cukup kuat':'Sangat kuat')+' · estimasi entropi ±'+Math.round(entropy)+' bit';
+}
+async function copyPw(){
+  const t=$('pw').textContent;
+  if(!t||t.includes('Klik')) return;
+  try{await navigator.clipboard.writeText(t);alert('Password disalin.');}
+  catch(e){alert('Gagal menyalin otomatis, blok teksnya lalu salin manual.');}
+}
+generate();
+</script>
+</body>
+</html>

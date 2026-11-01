@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markdown Live Preview</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fafafa;color:#111}
+.wrap{max-width:1100px;margin:0 auto;padding:22px 18px 36px}h1{font-size:21px;margin:0 0 6px}p{color:#666;margin:0 0 14px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}button{background:#111;color:#fff;border:none;border-radius:10px;padding:9px 15px;font:inherit;cursor:pointer}button.secondary{background:#fff;color:#111;border:1px solid #ddd}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:750px){.grid{grid-template-columns:1fr}}
+textarea{width:100%;min-height:520px;padding:16px;border:1px solid #ddd;border-radius:14px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;line-height:1.65;outline:none;resize:vertical}
+.preview{background:#fff;border:1px solid #ddd;border-radius:14px;padding:20px 22px;min-height:520px;line-height:1.7;overflow-wrap:break-word}
+.preview h1,.preview h2,.preview h3{line-height:1.3}.preview code{background:#f5f5f5;padding:2px 6px;border-radius:6px}.preview pre{background:#111;color:#e7e9ee;padding:14px;border-radius:10px;overflow:auto}.preview pre code{background:none;padding:0}
+.preview blockquote{border-left:4px solid #0095f6;margin:14px 0;padding:6px 14px;color:#555;background:#f8fbff}.preview table{border-collapse:collapse;width:100%}.preview th,.preview td{border:1px solid #ddd;padding:7px 10px;text-align:left}.preview img{max-width:100%}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>📝 Markdown Live Preview</h1>
+<p>Tulis di kiri, preview rapi langsung muncul di kanan. Mendukung heading, bold, list, kode, link, tabel, dan quote.</p>
+<div class="bar">
+<button onclick="loadSample()">Contoh</button>
+<button class="secondary" onclick="downloadMd()">Download .md</button>
+<button class="secondary" onclick="copyMd()">Salin Markdown</button>
+<button class="secondary" onclick="clearMd()">Hapus</button>
+</div>
+<div class="grid">
+<textarea id="input" spellcheck="false" oninput="render()"></textarea>
+<div class="preview" id="preview"></div>
+</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function inline(s){
+  return esc(s)
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g,'<em>$1</em>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+}
+function render(){
+  const lines=$('input').value.split('\n');
+  let html='',inList=false,inCode=false,codeBuf=[];
+  function closeList(){if(inList){html+='</ul>';inList=false;}}
+  lines.forEach(line=>{
+    if(line.trim().startsWith('```')){inCode=!inCode;if(inCode){closeList();codeBuf=[];}else{html+='<pre><code>'+esc(codeBuf.join('\n'))+'</code></pre>';}return;}
+    if(inCode){codeBuf.push(line);return;}
+    if(/^#{1,6}\s/.test(line)){closeList();const level=line.match(/^#+/)[0].length;html+=`<h${level}>`+inline(line.replace(/^#+\s/,''))+`</h${level}>`;return;}
+    if(line.trim().startsWith('> ')){closeList();html+='<blockquote>'+inline(line.trim().slice(2))+'</blockquote>';return;}
+    if(/^\s*[-*]\s+/.test(line)){if(!inList){html+='<ul>';inList=true;}html+='<li>'+inline(line.replace(/^\s*[-*]\s+/,'') )+'</li>';return;}
+    if(line.includes('|') && line.trim().startsWith('|')){closeList();const cells=line.split('|').filter(c=>c.trim());if(cells.every(c=>/^:?-{2,}:?$/.test(c.trim()))) return;html+='<table><tr>'+cells.map(c=>'<td>'+inline(c.trim())+'</td>').join('')+'</tr></table>';return;}
+    closeList();
+    if(line.trim()===''){return;}
+    html+='<p>'+inline(line)+'</p>';
+  });
+  closeList();
+  $('preview').innerHTML=html||'<p style="color:#999">Preview akan muncul di sini…</p>';
+}
+function loadSample(){
+  $('input').value='# Halo dari Markdown\n\nIni **tebal**, ini *miring*, dan ini `kode`.\n\n- JSON Formatter\n- Regex Tester\n- Password Generator\n\n> Kutipan: alat kecil yang kepakai tiap hari itu yang paling berharga.\n\n| Alat | Fungsi |\n| --- | --- |\n| JSON | Format & validasi |\n| Regex | Uji pola |\n\n```js\nconsole.log("Halo, cmalf!");\n```\n\nKunjungi [cmalf.github.io](https://cmalf.github.io/)';
+  render();
+}
+function downloadMd(){
+  const blob=new Blob([$('input').value],{type:'text/markdown'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='catatan.md';a.click();
+}
+async function copyMd(){try{await navigator.clipboard.writeText($('input').value);alert('Markdown disalin.');}catch(e){alert('Gagal menyalin otomatis.');}}
+function clearMd(){$('input').value='';render();}
+loadSample();
+</script>
+</body>
+</html>

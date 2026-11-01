@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color &amp; Gradient Studio</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fafafa;color:#111}
+.wrap{max-width:900px;margin:0 auto;padding:24px 18px 40px}h1{font-size:22px;margin:0 0 6px}p{color:#666;line-height:1.6}
+.preview{height:220px;border-radius:20px;border:1px solid #e5e5e5;box-shadow:0 10px 30px rgba(0,0,0,.08);display:flex;align-items:end;padding:18px}
+.preview span{background:rgba(0,0,0,.55);color:#fff;padding:8px 12px;border-radius:99px;font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}@media(max-width:650px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:16px;padding:16px}
+label{display:block;font-size:13px;color:#666;margin-bottom:6px}.row{display:flex;gap:10px;align-items:center}
+input[type=color]{width:56px;height:44px;border:1px solid #ddd;border-radius:10px;padding:3px;background:#fff;cursor:pointer}
+input[type=text],input[type=range],select{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;font:inherit}
+button{background:#111;color:#fff;border:none;border-radius:10px;padding:10px 16px;font:inherit;cursor:pointer;margin:6px 6px 0 0}button.secondary{background:#efefef;color:#111}
+pre{background:#111;color:#e7e9ee;border-radius:12px;padding:15px;white-space:pre-wrap;word-break:break-all;font-size:14px;line-height:1.6}
+.swatches{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.sw{width:44px;height:44px;border-radius:12px;border:1px solid rgba(0,0,0,.1);cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🎨 Color &amp; Gradient Studio</h1>
+<p>Pilih warna, atur arah gradasi, langsung copy kode CSS-nya. Cocok buat landing page, kartu, dan tombol.</p>
+<div class="preview" id="preview"><span id="previewLabel">Gradasi kamu</span></div>
+<div class="grid">
+<div class="card">
+<label>Warna 1</label>
+<div class="row"><input type="color" id="c1" value="#7dd3fc" oninput="syncHex(1)"><input type="text" id="h1" value="#7dd3fc" oninput="syncColor(1)"></div>
+<label style="margin-top:14px">Warna 2</label>
+<div class="row"><input type="color" id="c2" value="#a78bfa" oninput="syncHex(2)"><input type="text" id="h2" value="#a78bfa" oninput="syncColor(2)"></div>
+</div>
+<div class="card">
+<label>Arah gradasi</label>
+<select id="dir" onchange="update()">
+<option value="90deg">→ Kanan (90deg)</option>
+<option value="180deg">↓ Bawah (180deg)</option>
+<option value="45deg">↘ Diagonal (45deg)</option>
+<option value="135deg">↙ Diagonal (135deg)</option>
+<option value="to right">to right</option>
+<option value="to bottom">to bottom</option>
+</select>
+<label style="margin-top:14px">Jenis</label>
+<select id="type" onchange="update()"><option value="linear-gradient">Linear</option><option value="radial-gradient">Radial</option></select>
+<button onclick="randomize()">Acak Warna</button>
+<button class="secondary" onclick="copyCss()">Salin CSS</button>
+</div>
+</div>
+<div class="card" style="margin-top:14px">
+<label>Kode CSS</label>
+<pre id="css"></pre>
+<label>Palet siap pakai (klik untuk pakai)</label>
+<div class="swatches" id="swatches"></div>
+</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const palettes=[['#feda75','#d62976'],['#00c6ff','#0072ff'],['#43e97b','#38f9d7'],['#fa709a','#fee140'],['#667eea','#764ba2'],['#f83600','#f9d423'],['#11998e','#38ef7d'],['#fc4a1a','#f7b733']];
+function update(){
+  const a=$('h1').value,b=$('h2').value,dir=$('dir').value,type=$('type').value;
+  let css='';
+  if(type==='linear-gradient') css=`background: linear-gradient(${dir}, ${a}, ${b});`;
+  else css=`background: radial-gradient(circle, ${a}, ${b});`;
+  $('preview').style.background=css.replace('background: ','').replace(';','');
+  $('css').textContent=css+'\n/* Warna: '+a+' → '+b+' */';
+  $('previewLabel').textContent=a+' → '+b;
+}
+function syncHex(n){$('h'+n).value=$('c'+n).value;update();}
+function syncColor(n){
+  const v=$('h'+n).value;
+  if(/^#[0-9a-fA-F]{6}$/.test(v)) $('c'+n).value=v;
+  update();
+}
+function randomize(){
+  const r=()=> '#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');
+  $('h1').value=r();$('c1').value=$('h1').value;
+  $('h2').value=r();$('c2').value=$('h2').value;
+  update();
+}
+async function copyCss(){
+  try{await navigator.clipboard.writeText($('css').textContent);alert('CSS disalin.');}
+  catch(e){alert('Gagal menyalin, blok kode lalu salin manual.');}
+}
+palettes.forEach(p=>{
+  const d=document.createElement('div');
+  d.className='sw';d.title=p.join(' → ');d.style.background=`linear-gradient(135deg, ${p[0]}, ${p[1]})`;
+  d.onclick=()=>{$('h1').value=p[0];$('c1').value=p[0];$('h2').value=p[1];$('c2').value=p[1];update();};
+  $('swatches').appendChild(d);
+});
+update();
+</script>
+</body>
+</html>

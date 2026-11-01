@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Resizer &amp; Compressor</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fafafa;color:#111}
+.wrap{max-width:900px;margin:0 auto;padding:24px 18px 40px}h1{font-size:22px;margin:0 0 6px}p{color:#666;line-height:1.6}
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:16px;padding:18px;margin-top:14px}
+.drop{border:2px dashed #ccc;border-radius:14px;padding:36px 18px;text-align:center;cursor:pointer}.drop:hover{border-color:#0095f6;background:#f8fbff}
+img{max-width:100%;border-radius:12px;display:block;margin:0 auto}
+label{display:block;font-size:13px;color:#666;margin:12px 0 6px}input,select{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;font:inherit}
+button{background:#111;color:#fff;border:none;border-radius:10px;padding:11px 18px;font:inherit;cursor:pointer;margin:8px 8px 0 0}button:disabled{opacity:.4}button.secondary{background:#efefef;color:#111}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:650px){.grid{grid-template-columns:1fr}}
+.stat{font-size:14px;line-height:1.7}.note{font-size:13px;color:#888;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🖼️ Image Resizer &amp; Compressor</h1>
+<p>Resize dan kompres gambar langsung di browser pakai canvas — gambar tidak diupload ke server manapun.</p>
+<div class="card">
+<div class="drop" id="drop" onclick="$('file').click()">
+<b>Seret gambar ke sini, atau klik untuk pilih file</b><br><span style="color:#888;font-size:14px">JPG, PNG, WebP · diproses lokal di perangkatmu</span>
+</div>
+<input type="file" id="file" accept="image/*" hidden onchange="loadFile(event)">
+<div id="editor" style="display:none">
+<img id="preview" alt="Preview gambar">
+<div class="grid">
+<div><label>Lebar maks (px, kosong = asli)</label><input id="maxW" type="number" value="1200" min="1"></div>
+<div><label>Kualitas (untuk JPG / WebP)</label><input id="quality" type="range" min="10" max="100" value="85" oninput="$('qLabel').textContent=this.value+'%'"><span id="qLabel">85%</span></div>
+<div><label>Format output</label><select id="format"><option value="image/jpeg">JPG</option><option value="image/png">PNG</option><option value="image/webp">WebP</option></select></div>
+<div><label>Nama file output</label><input id="filename" value="gambar-kompres"></div>
+</div>
+<div class="stat" id="stats"></div>
+<button id="downloadBtn" onclick="process(true)">Download Hasil</button>
+<button class="secondary" onclick="process(false)">Lihat Ukuran Hasil</button>
+</div>
+<p class="note">Catatan: PNG tidak memakai slider kualitas (lossless). Untuk foto, JPG / WebP biasanya jauh lebih kecil. Gambar asli tidak pernah keluar dari perangkatmu.</p>
+</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let imgEl=new Image(), originalSize=0, originalName='';
+const drop=$('drop');
+['dragover','dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();}));
+drop.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f) readFile(f);});
+function readFile(file){
+  if(!file.type.startsWith('image/')) return alert('Pilih file gambar.');
+  originalSize=file.size;originalName=file.name;
+  const r=new FileReader();
+  r.onload=e=>{imgEl.onload=()=>{$('preview').src=e.target.result;$('editor').style.display='block';updateStats();};imgEl.src=e.target.result;};
+  r.readAsDataURL(file);
+}
+function loadFile(e){if(e.target.files[0]) readFile(e.target.files[0]);}
+function updateStats(){
+  $('stats').innerHTML='Ukuran asli: <b>'+fmt(originalSize)+'</b> · Dimensi asli: <b>'+imgEl.naturalWidth+' × '+imgEl.naturalHeight+' px</b>';
+}
+function fmt(b){
+  if(b<1024) return b+' B';
+  if(b<1048576) return (b/1024).toFixed(1)+' KB';
+  return (b/1048576).toFixed(2)+' MB';
+}
+function process(download){
+  const maxW=Number($('maxW').value)||imgEl.naturalWidth;
+  const scale=Math.min(1,maxW/imgEl.naturalWidth);
+  const w=Math.round(imgEl.naturalWidth*scale),h=Math.round(imgEl.naturalHeight*scale);
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  c.getContext('2d').drawImage(imgEl,0,0,w,h);
+  const type=$('format').value;
+  const q=type==='image/png'?undefined:Number($('quality').value)/100;
+  c.toBlob(blob=>{
+    if(!blob) return alert('Gagal memproses gambar.');
+    const ext=type.split('/')[1].replace('jpeg','jpg');
+    $('stats').innerHTML+='<br>Hasil: <b>'+w+' × '+h+' px · '+fmt(blob.size)+'</b> ('+type+') · hemat '+Math.max(0,Math.round((1-blob.size/originalSize)*100))+'% dari asli.';
+    if(download){
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=($('filename').value||'gambar')+'.'+ext;a.click();
+    }
+  },type,q);
+}
+</script>
+</body>
+</html>

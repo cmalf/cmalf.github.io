@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON Formatter &amp; Validator</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#0e1014;color:#e7e9ee}
+.wrap{max-width:980px;margin:0 auto;padding:24px 18px 40px}h1{font-size:22px;margin:0 0 6px}p{color:#9aa3b2;margin:0 0 18px;line-height:1.6}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}button,select{background:#1d212b;color:#e7e9ee;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 14px;font:inherit;font-size:14px;cursor:pointer}button:hover{background:#2a303e}button.primary{background:#0095f6;border-color:#0095f6}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:720px){.grid{grid-template-columns:1fr}}
+textarea,pre{width:100%;min-height:340px;background:#171a21;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:16px;color:#e7e9ee;font:inherit;font-size:14px;line-height:1.6;outline:none;white-space:pre-wrap;word-break:break-word}textarea:focus{border-color:#7dd3fc}
+.status{margin-top:10px;padding:12px 14px;border-radius:10px;background:#171a21;border:1px solid rgba(255,255,255,.1);font-size:14px}.ok{color:#a7f3d0}.err{color:#fca5a5}
+label{font-size:13px;color:#9aa3b2}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>{ } JSON Formatter &amp; Validator</h1>
+<p>Tempel JSON berantakan, langsung jadi rapi — semua diproses di browser, tanpa dikirim ke server.</p>
+<div class="bar">
+<button class="primary" onclick="format(false)">Format</button>
+<button onclick="format(true)">Minify</button>
+<button onclick="validate()">Validasi</button>
+<button onclick="copyOut()">Salin Hasil</button>
+<button onclick="loadSample()">Contoh</button>
+<button onclick="clearAll()">Hapus</button>
+<label>Indent <select id="indent"><option value="2">2 spasi</option><option value="4">4 spasi</option><option value="tab">Tab</option></select></label>
+</div>
+<div class="grid">
+<textarea id="input" placeholder='{"nama":"cmalf","tools":["json","regex"]}' spellcheck="false"></textarea>
+<pre id="output" aria-label="Hasil">Hasil akan muncul di sini…</pre>
+</div>
+<div class="status" id="status">Siap. Tempel JSON di kolom kiri.</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+function parseInput(){
+  const raw=$('input').value.trim();
+  if(!raw) throw new Error('Kolom input masih kosong.');
+  return JSON.parse(raw);
+}
+function indentValue(){
+  const v=$('indent').value;
+  return v==='tab' ? '\t' : Number(v);
+}
+function format(minify){
+  try{
+    const data=parseInput();
+    $('output').textContent=minify ? JSON.stringify(data) : JSON.stringify(data,null,indentValue());
+    $('status').innerHTML='<span class="ok">✓ JSON valid.</span> '+(Array.isArray(data)?data.length+' item':typeof data);
+  }catch(e){
+    $('output').textContent='';
+    $('status').innerHTML='<span class="err">✗ JSON tidak valid:</span> '+e.message;
+  }
+}
+function validate(){
+  try{parseInput();$('status').innerHTML='<span class="ok">✓ JSON valid, siap dipakai.</span>';}
+  catch(e){$('status').innerHTML='<span class="err">✗ JSON tidak valid:</span> '+e.message;}
+}
+async function copyOut(){
+  const t=$('output').textContent;
+  if(!t||t.startsWith('Hasil akan')) return;
+  try{await navigator.clipboard.writeText(t);$('status').textContent='Hasil disalin.';}
+  catch(e){$('status').textContent='Gagal menyalin, blok hasil lalu salin manual.';}
+}
+function loadSample(){
+  $('input').value=JSON.stringify({nama:"cmalf",proyek:"web-tools",tools:["json-formatter","regex-tester"],aktif:true,versi:1},null,2);
+  format(false);
+}
+function clearAll(){$('input').value='';$('output').textContent='Hasil akan muncul di sini…';$('status').textContent='Siap.';}
+</script>
+</body>
+</html>
