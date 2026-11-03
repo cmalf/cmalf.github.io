@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base64, URL &amp; Hash Lab</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fafafa;color:#111}
+.wrap{max-width:900px;margin:0 auto;padding:24px 18px 40px}h1{font-size:22px;margin:0 0 6px}p{color:#666;line-height:1.6}
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:16px;padding:18px;margin-top:14px}
+textarea{width:100%;min-height:130px;padding:13px;border:1px solid #ddd;border-radius:12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;line-height:1.6;outline:none}textarea:focus{border-color:#0095f6}
+button{background:#111;color:#fff;border:none;border-radius:10px;padding:9px 15px;font:inherit;cursor:pointer;margin:6px 6px 0 0}button.secondary{background:#efefef;color:#111}
+select{padding:9px;border:1px solid #ddd;border-radius:10px;font:inherit}
+.out{background:#f5f5f5;border-radius:10px;padding:13px;word-break:break-all;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;line-height:1.6;margin-top:10px}
+.err{color:#dc2626}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🔑 Base64, URL &amp; Hash Lab</h1>
+<p>Encode, decode, dan hitung hash — semua lokal di browser. Hash pakai WebCrypto bawaan, tanpa kirim teks ke server.</p>
+<div class="card">
+<label><b>Teks input</b></label>
+<textarea id="input" spellcheck="false">Halo dari cmalf!</textarea>
+<div>
+<button onclick="b64encode()">Base64 Encode</button>
+<button onclick="b64decode()">Base64 Decode</button>
+<button onclick="urlEncode()">URL Encode</button>
+<button onclick="urlDecode()">URL Decode</button>
+<button class="secondary" onclick="copyResult()">Salin Hasil</button>
+</div>
+<div class="out" id="result">Hasil muncul di sini…</div>
+<div id="error" class="err"></div>
+</div>
+<div class="card">
+<h3 style="margin-top:0">Hash</h3>
+<p style="font-size:14px">Hash dihitung dari teks input di atas, bukan dari hasil encode.</p>
+<label>Algoritma
+<select id="algo"><option value="SHA-256">SHA-256</option><option value="SHA-384">SHA-384</option><option value="SHA-512">SHA-512</option><option value="SHA-1">SHA-1 (tidak disarankan untuk keamanan)</option></select>
+</label>
+<button onclick="hashText()" style="margin-top:10px">Hitung Hash</button>
+<div class="out" id="hashOut">—</div>
+</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+function show(t){$('result').textContent=t;$('error').textContent='';}
+function fail(msg){$('error').textContent=msg;}
+function b64encode(){
+  try{show(btoa(unescape(encodeURIComponent($('input').value))));}
+  catch(e){fail('Gagal encode: '+e.message);}
+}
+function b64decode(){
+  try{show(decodeURIComponent(escape(atob($('input').value.trim()))));}
+  catch(e){fail('Base64 tidak valid: '+e.message);}
+}
+function urlEncode(){try{show(encodeURIComponent($('input').value));}catch(e){fail(e.message);}}
+function urlDecode(){try{show(decodeURIComponent($('input').value));}catch(e){fail('URL encoding tidak valid: '+e.message);}}
+async function hashText(){
+  try{
+    const data=new TextEncoder().encode($('input').value);
+    const buf=await crypto.subtle.digest($('algo').value,data);
+    const hex=[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+    $('hashOut').textContent=hex;
+  }catch(e){$('hashOut').textContent='Gagal menghitung hash: '+e.message;}
+}
+async function copyResult(){
+  const t=$('result').textContent;
+  if(!t||t.startsWith('Hasil')) return;
+  try{await navigator.clipboard.writeText(t);alert('Hasil disalin.');}catch(e){alert('Gagal menyalin otomatis.');}
+}
+b64encode();
+</script>
+</body>
+</html>

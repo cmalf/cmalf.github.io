@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSV ⇄ JSON Converter</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0e1014;color:#e7e9ee}
+.wrap{max-width:1000px;margin:0 auto;padding:24px 18px 40px}h1{font-size:22px;margin:0 0 6px}p{color:#9aa3b2;line-height:1.6}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}button{background:#1d212b;color:#e7e9ee;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:9px 14px;font:inherit;cursor:pointer}button:hover{background:#2a303e}button.primary{background:#0095f6;border-color:#0095f6}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:720px){.grid{grid-template-columns:1fr}}
+textarea{width:100%;min-height:320px;padding:15px;background:#171a21;color:#e7e9ee;border:1px solid rgba(255,255,255,.1);border-radius:14px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;line-height:1.6;outline:none}textarea:focus{border-color:#7dd3fc}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:14px}th,td{border:1px solid rgba(255,255,255,.12);padding:8px 10px;text-align:left;vertical-align:top}th{background:#1d212b}
+.err{color:#fca5a5}.ok{color:#a7f3d0}label{font-size:13px;color:#9aa3b2}select{background:#1d212b;color:#e7e9ee;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:7px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🔄 CSV ⇄ JSON Converter</h1>
+<p>Ubah CSV jadi JSON dan sebaliknya, lengkap dengan preview tabel. Diproses lokal, tanpa upload.</p>
+<div class="bar">
+<button class="primary" onclick="csvToJson()">CSV → JSON</button>
+<button onclick="jsonToCsv()">JSON → CSV</button>
+<button onclick="copyOut()">Salin Hasil</button>
+<button onclick="downloadOut()">Download Hasil</button>
+<button onclick="loadSample()">Contoh</button>
+<button onclick="clearAll()">Hapus</button>
+<label>Delimiter <select id="delim"><option value=",">Koma (,)</option><option value=";">Titik koma (;)</option><option value="	">Tab</option></select></label>
+</div>
+<div class="grid">
+<textarea id="input" placeholder="Tempel CSV atau JSON di sini…" spellcheck="false"></textarea>
+<textarea id="output" placeholder="Hasil muncul di sini…" readonly spellcheck="false"></textarea>
+</div>
+<div id="status" style="margin-top:10px"></div>
+<div id="tableWrap" style="overflow:auto"></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+function parseCsv(text,delim){
+  const rows=[];let row=[],cur='',inQ=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(inQ){
+      if(c==='"'){if(text[i+1]==='"'){cur+='"';i++;}else inQ=false;}
+      else cur+=c;
+    }else if(c==='"') inQ=true;
+    else if(c===delim){row.push(cur);cur='';}
+    else if(c==='\n'){row.push(cur);rows.push(row);row=[];cur='';}
+    else if(c!=='\r') cur+=c;
+  }
+  if(cur!==''||row.length){row.push(cur);rows.push(row);}
+  return rows.filter(r=>r.some(c=>c.trim()!==''));
+}
+function csvToJson(){
+  try{
+    const rows=parseCsv($('input').value,$('delim').value);
+    if(rows.length<2) throw new Error('CSV butuh minimal 1 baris header dan 1 baris data.');
+    const headers=rows[0];
+    const data=rows.slice(1).map(r=>{const o={};headers.forEach((h,i)=>o[h]=r[i]??'');return o;});
+    $('output').value=JSON.stringify(data,null,2);
+    $('status').innerHTML='<span class="ok">✓ '+data.length+' baris diubah jadi JSON.</span>';
+    renderTable(headers,data);
+  }catch(e){$('status').innerHTML='<span class="err">✗ '+e.message+'</span>';}
+}
+function renderTable(headers,data){
+  $('tableWrap').innerHTML='<table><tr>'+headers.map(h=>'<th>'+h.replace(/</g,'&lt;')+'</th>').join('')+'</tr>'+data.map(r=>'<tr>'+headers.map(h=>'<td>'+String(r[h]??'').replace(/</g,'&lt;')+'</td>').join('')+'</tr>').join('')+'</table>';
+}
+function jsonToCsv(){
+  try{
+    const data=JSON.parse($('input').value);
+    const arr=Array.isArray(data)?data:[data];
+    if(!arr.length||typeof arr[0]!=='object') throw new Error('JSON harus berupa array of object.');
+    const headers=[...new Set(arr.flatMap(o=>Object.keys(o)))];
+    const delim=$('delim').value;
+    const esc=v=>{const s=String(v??'');return s.includes(delim)||s.includes('"')||s.includes('\n')?'"'+s.replace(/"/g,'""')+'"':s;};
+    const csv=[headers.join(delim),...arr.map(r=>headers.map(h=>esc(r[h])).join(delim))].join('\n');
+    $('output').value=csv;
+    $('status').innerHTML='<span class="ok">✓ '+arr.length+' baris diubah jadi CSV.</span>';
+    renderTable(headers,arr);
+  }catch(e){$('status').innerHTML='<span class="err">✗ '+e.message+'</span>';}
+}
+async function copyOut(){
+  if(!$('output').value) return;
+  try{await navigator.clipboard.writeText($('output').value);alert('Hasil disalin.');}catch(e){alert('Gagal menyalin otomatis.');}
+}
+function downloadOut(){
+  if(!$('output').value) return;
+  const isJson=$('output').value.trim().startsWith('[')||$('output').value.trim().startsWith('{');
+  const blob=new Blob([$('output').value],{type:isJson?'application/json':'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=isJson?'hasil.json':'hasil.csv';a.click();
+}
+function loadSample(){
+  $('input').value='nama,tools,harga\nJSON Formatter,json,0\nRegex Tester,regex,0\nImage Resizer,gambar,0';
+  csvToJson();
+}
+function clearAll(){$('input').value='';$('output').value='';$('tableWrap').innerHTML='';$('status').textContent='';}
+loadSample();
+</script>
+</body>
+</html>

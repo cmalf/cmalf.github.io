@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Playground</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fafafa;color:#111}
+.wrap{max-width:1000px;margin:0 auto;padding:24px 18px 40px}h1{font-size:22px;margin:0 0 6px}p{color:#666;line-height:1.6}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:16px;padding:18px}
+.stage{background:repeating-conic-gradient(#f3f3f3 0% 25%, #fff 0% 50%) 0 0/24px 24px;border:1px solid #e5e5e5;border-radius:16px;min-height:340px;display:flex;align-items:center;justify-content:center;padding:30px}
+#box{width:220px;height:160px;background:linear-gradient(135deg,#7dd3fc,#a78bfa);display:flex;align-items:center;justify-content:center;color:#111;font-weight:700;text-align:center;padding:12px}
+label{display:block;font-size:13px;color:#555;margin:12px 0 4px}label b{color:#111}
+input[type=range]{width:100%}input[type=color]{width:100%;height:40px;border:1px solid #ddd;border-radius:10px;padding:3px;background:#fff}
+pre{background:#111;color:#e7e9ee;border-radius:12px;padding:15px;white-space:pre-wrap;word-break:break-all;font-size:14px;line-height:1.65}
+button{background:#111;color:#fff;border:none;border-radius:10px;padding:10px 16px;font:inherit;cursor:pointer;margin:6px 6px 0 0}button.secondary{background:#efefef;color:#111}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🧩 CSS Playground</h1>
+<p>Geser slider, lihat kotaknya berubah live, lalu salin CSS-nya. Fokus ke bayangan, radius, dan padding — pasangan Color &amp; Gradient Studio.</p>
+<div class="grid">
+<div class="stage"><div id="box">Kotak Preview</div></div>
+<div class="card">
+<label>Shadow X: <b id="vX">0px</b></label><input type="range" id="sx" min="-50" max="50" value="0" oninput="update()">
+<label>Shadow Y: <b id="vY">12px</b></label><input type="range" id="sy" min="-50" max="50" value="12" oninput="update()">
+<label>Shadow Blur: <b id="vB">30px</b></label><input type="range" id="sb" min="0" max="100" value="30" oninput="update()">
+<label>Shadow Spread: <b id="vS">0px</b></label><input type="range" id="ss" min="-20" max="50" value="0" oninput="update()">
+<label>Warna Shadow</label><input type="color" id="sc" value="#000000" oninput="update()">
+<div class="row">
+<div><label>Radius: <b id="vR">18px</b></label><input type="range" id="radius" min="0" max="100" value="18" oninput="update()"></div>
+<div><label>Padding: <b id="vP">16px</b></label><input type="range" id="pad" min="0" max="48" value="16" oninput="update()"></div>
+</div>
+<label>Warna Kotak</label><input type="color" id="bg" value="#a78bfa" oninput="update()">
+<button onclick="copyCss()">Salin CSS</button>
+<button class="secondary" onclick="resetAll()">Reset</button>
+</div>
+</div>
+<div class="card" style="margin-top:16px">
+<label>Kode CSS</label>
+<pre id="css"></pre>
+</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+function hexToRgba(hex,alpha){
+  const n=parseInt(hex.slice(1),16);
+  return `rgba(${(n>>16)&255}, ${(n>>8)&255}, ${n&255}, ${alpha})`;
+}
+function update(){
+  const x=$('sx').value,y=$('sy').value,b=$('sb').value,s=$('ss').value,r=$('radius').value,p=$('pad').value;
+  $('vX').textContent=x+'px';$('vY').textContent=y+'px';$('vB').textContent=b+'px';$('vS').textContent=s+'px';$('vR').textContent=r+'px';$('vP').textContent=p+'px';
+  const box=$('box');
+  box.style.boxShadow=`${x}px ${y}px ${b}px ${s}px ${hexToRgba($('sc').value,0.25)}`;
+  box.style.borderRadius=r+'px';
+  box.style.padding=p+'px';
+  box.style.background=$('bg').value;
+  $('css').textContent=`box-shadow: ${x}px ${y}px ${b}px ${s}px ${hexToRgba($('sc').value,0.25)};\nborder-radius: ${r}px;\npadding: ${p}px;\nbackground: ${$('bg').value};`;
+}
+async function copyCss(){
+  try{await navigator.clipboard.writeText($('css').textContent);alert('CSS disalin.');}catch(e){alert('Gagal menyalin otomatis.');}
+}
+function resetAll(){
+  $('sx').value=0;$('sy').value=12;$('sb').value=30;$('ss').value=0;$('radius').value=18;$('pad').value=16;$('sc').value='#000000';$('bg').value='#a78bfa';update();
+}
+update();
+</script>
+</body>
+</html>

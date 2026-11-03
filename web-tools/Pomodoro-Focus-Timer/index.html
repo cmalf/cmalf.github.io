@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pomodoro Focus Timer</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0e1014;color:#e7e9ee}
+.wrap{max-width:720px;margin:0 auto;padding:24px 18px 40px;text-align:center}h1{font-size:22px;margin:0 0 6px}p{color:#9aa3b2;line-height:1.6}
+.card{background:#171a21;border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:26px 20px;margin-top:16px}
+.mode{font-size:14px;letter-spacing:1px;text-transform:uppercase;color:#7dd3fc;font-weight:700}
+.time{font-size:84px;font-weight:800;letter-spacing:-3px;font-variant-numeric:tabular-nums;margin:6px 0}@media(max-width:500px){.time{font-size:64px}}
+button{background:#0095f6;color:#fff;border:none;border-radius:999px;padding:12px 24px;font:inherit;font-weight:600;cursor:pointer;margin:6px}button.secondary{background:#2a303e}
+button:disabled{opacity:.4}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+input{width:90px;padding:9px;border:1px solid rgba(255,255,255,.15);border-radius:10px;background:#0e1014;color:#e7e9ee;font:inherit;text-align:center}
+label{font-size:13px;color:#9aa3b2;display:block;margin-bottom:4px}
+.progress{height:10px;background:#2a303e;border-radius:99px;overflow:hidden;margin-top:18px}.progress i{display:block;height:100%;background:#7dd3fc;transition:width .5s}
+.task{margin-top:16px;text-align:left;background:#0e1014;border-radius:12px;padding:14px}.task input{width:100%;text-align:left}
+.history{font-size:14px;color:#9aa3b2;line-height:1.8;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🍅 Pomodoro Focus Timer</h1>
+<p>Fokus 25 menit, istirahat 5 menit, ulangi. Riwayat sesi kesimpan di browser ini.</p>
+<div class="card">
+<div class="mode" id="mode">Mode Fokus</div>
+<div class="time" id="time">25:00</div>
+<div class="progress"><i id="bar" style="width:0%"></i></div>
+<div>
+<button id="startBtn" onclick="toggle()">Mulai</button>
+<button class="secondary" onclick="resetTimer()">Reset</button>
+<button class="secondary" onclick="skip()">Lewati →</button>
+</div>
+<div class="row">
+<div><label>Fokus (menit)</label><input id="focusMin" type="number" value="25" min="1" max="120"></div>
+<div><label>Istirahat (menit)</label><input id="breakMin" type="number" value="5" min="1" max="60"></div>
+<div><label>Istirahat panjang tiap</label><input id="longEvery" type="number" value="4" min="2" max="8"></div>
+</div>
+<div class="task">
+<label>Tugas yang sedang dikerjakan</label>
+<input id="taskInput" placeholder="mis. Nulis README, review PR, belajar React…" oninput="saveTask()">
+</div>
+<div class="history" id="history"></div>
+</div>
+<p style="font-size:13px">Tips: bunyi selesai dibuat pakai Web Audio di browser, jadi tidak perlu file suara eksternal. Timer tetap jalan selama tab ini terbuka.</p>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let total=25*60, remaining=total, running=false, timer=null, mode='focus', completed=0;
+function load(){
+  try{
+    completed=Number(localStorage.getItem('pomodoroCompleted')||0);
+    $('taskInput').value=localStorage.getItem('pomodoroTask')||'';
+  }catch(e){}
+  renderHistory();
+}
+function saveTask(){try{localStorage.setItem('pomodoroTask',$('taskInput').value);}catch(e){}}
+function renderHistory(){
+  $('history').innerHTML='Sesi fokus selesai: <b>'+completed+'</b> · Mode: <b>'+(mode==='focus'?'Fokus':mode==='break'?'Istirahat':'Istirahat Panjang')+'</b>';
+}
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+function applyMode(){
+  const f=Number($('focusMin').value)||25;
+  const b=Number($('breakMin').value)||5;
+  total=(mode==='focus'?f:mode==='break'?b:15)*60;
+  remaining=total;
+  $('mode').textContent=mode==='focus'?'Mode Fokus':mode==='break'?'Istirahat':'Istirahat Panjang';
+  $('time').textContent=fmt(remaining);
+  $('bar').style.width='0%';
+  renderHistory();
+}
+function beep(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    [0,0.25,0.5].forEach((t,i)=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=880;o.type='sine';
+      g.gain.setValueAtTime(0.001,ctx.currentTime+t);
+      g.gain.exponentialRampToValueAtTime(0.2,ctx.currentTime+t+0.05);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.2);
+      o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+0.25);
+    });
+  }catch(e){}
+}
+function toggle(){
+  if(running){clearInterval(timer);running=false;$('startBtn').textContent='Lanjutkan';return;}
+  running=true;$('startBtn').textContent='Jeda';
+  timer=setInterval(()=>{
+    remaining--;
+    $('time').textContent=fmt(Math.max(0,remaining));
+    $('bar').style.width=((total-remaining)/total*100)+'%';
+    if(remaining<=0){
+      clearInterval(timer);running=false;$('startBtn').textContent='Mulai';beep();
+      if(mode==='focus'){
+        completed++;
+        try{localStorage.setItem('pomodoroCompleted',completed);}catch(e){}
+        const every=Number($('longEvery').value)||4;
+        mode=(completed%every===0)?'long':'break';
+      }else mode='focus';
+      applyMode();
+      alert(mode==='focus'?'Waktunya fokus lagi!':'Waktunya istirahat!');
+    }
+  },1000);
+}
+function resetTimer(){clearInterval(timer);running=false;$('startBtn').textContent='Mulai';mode='focus';applyMode();}
+function skip(){
+  clearInterval(timer);running=false;$('startBtn').textContent='Mulai';
+  if(mode==='focus'){completed++;try{localStorage.setItem('pomodoroCompleted',completed);}catch(e){}mode='break';}
+  else mode='focus';
+  applyMode();
+}
+load();applyMode();
+</script>
+</body>
+</html>
